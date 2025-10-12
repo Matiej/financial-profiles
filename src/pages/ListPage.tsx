@@ -1,68 +1,101 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchSubmissions, fmtDate } from "../api";
-import type { SubmissionListItem } from "../types";
+import DetailButton from "../components/DetailButton"; 
+
+type ProfiledClientAnswerShort = {
+  clientName: string;
+  clientId: string;
+  submissionId: string;
+  submissionDate: string;
+  testName: string;
+};
 
 export default function ListPage() {
-  const [data, setData] = useState<SubmissionListItem[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<ProfiledClientAnswerShort[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
-      setLoading(true); setError(null);
-      try {
-        const list = await fetchSubmissions();
-        setData(list);
-      } catch (e: unknown) {
-        setError(e + "Błąd pobierania listy");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    fetch("/api/profiler")
+      .then((res) => {
+        if (!res.ok) throw new Error("Błąd podczas pobierania danych");
+        return res.json();
+      })
+      .then(setData)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString("pl-PL", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center py-10 text-zinc-600">
+        ⏳ Wczytywanie danych...
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="text-red-600 text-center py-10">
+        ❌ Błąd: {error}
+      </div>
+    );
+
   return (
-    <div style={{ padding: 24, maxWidth: 1100, margin: "0 auto" }}>
-      <h1>Lista zgłoszeń</h1>
-      <p style={{ color: "#666" }}>Klient, Client ID, Submission, Data → „Detale”</p>
+    <div className="max-w-5xl mx-auto">
+      <h1 className="text-2xl font-semibold text-[#0f1e3a] mb-4 text-center">
+        Lista wyników testu
+      </h1>
 
-      {error && <div style={{ color: "crimson", margin: "12px 0" }}>Błąd: {error}</div>}
-      {loading && <div>Ładowanie…</div>}
-      {!loading && data && data.length === 0 && <div>Brak zgłoszeń.</div>}
-
-      {!loading && data && data.length > 0 && (
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 12 }}>
-          <thead>
-            <tr>
-              <th style={th}>Klient</th>
-              <th style={th}>Client ID</th>
-              <th style={th}>Submission</th>
-              <th style={th}>Data</th>
-              <th style={th}>Akcje</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map(row => (
-              <tr key={row.submissionId}>
-                <td style={td}>{row.clientName || "—"}</td>
-                <td style={tdMono}>{row.clientId}</td>
-                <td style={tdMono}>{row.submissionId}</td>
-                <td style={td}>{fmtDate(row.submissionDate)}</td>
-                <td style={td}>
-                  <Link to={`/submissions/${row.submissionId}`}>
-                    <button color="green">Detale</button>
-                  </Link>
-                </td>
+      {data.length === 0 ? (
+        <div className="text-center text-zinc-500 py-8">
+          Brak danych do wyświetlenia.
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-separate border-spacing-y-1">
+            <thead>
+              <tr className="text-left text-sm text-zinc-500 border-b border-zinc-100">
+                <th className="px-3 py-2">Klient</th>
+                <th className="px-3 py-2">Client ID</th>
+                <th className="px-3 py-2">Submission</th>
+                <th className="px-3 py-2">Data</th>
+                <th className="px-3 py-2 text-right">Akcje</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {data.map((row) => (
+                <tr
+                  key={row.submissionId}
+                  className="bg-white shadow-sm hover:shadow-md transition rounded-md"
+                >
+                  <td className="px-3 py-2">{row.clientName || "—"}</td>
+                  <td className="px-3 py-2 font-mono text-sm text-zinc-700">
+                    {row.clientId}
+                  </td>
+                  <td className="px-3 py-2 font-mono text-sm text-zinc-700">
+                    {row.submissionId}
+                  </td>
+                  <td className="px-3 py-2 text-sm text-zinc-700">
+                    {formatDate(row.submissionDate)}
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <Link to={`/submissions/${row.submissionId}`}>
+                      <DetailButton size="sm">Detale</DetailButton>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
 }
-
-const th: React.CSSProperties = { textAlign: "left", borderBottom: "1px solid #ddd", padding: "8px" };
-const td: React.CSSProperties = { borderBottom: "1px solid #eee", padding: "8px" };
-const tdMono: React.CSSProperties = { ...td, fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" };
