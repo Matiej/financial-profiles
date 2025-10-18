@@ -3,6 +3,8 @@ import { Routes, Route, Navigate, Link, NavLink } from "react-router-dom";
 import ListPage from "./pages/ListPage";
 import DetailsPage from "./pages/DetailsPage";
 import StatementsDictionaryPage from "./pages/StatementsDictionaryPage";
+import AnalysesListPage from "./pages/AnalysesListPage";
+import AnalysisDetailsPage from "./pages/AnalysisDetailsPage";
 
 function App() {
   return (
@@ -39,6 +41,8 @@ function App() {
           <Route path="/" element={<Navigate to="/submissions" replace />} />
           <Route path="/submissions" element={<ListPage />} />
           <Route path="/submissions/:submissionId" element={<DetailsPage />} />
+          <Route path="/submissions/:submissionId/analyses" element={<AnalysesListPage />} />
+          <Route path="/submissions/:submissionId/analyses/:index" element={<AnalysisDetailsPage />} />
           <Route path="/dictionary" element={<StatementsDictionaryPage />} />
           <Route path="*" element={<div className="p-6">404</div>} />
         </Routes>

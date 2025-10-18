@@ -8,6 +8,7 @@ type ProfiledClientAnswerShort = {
   submissionId: string;
   submissionDate: string;
   testName: string;
+  isAnalyzed: boolean; // ⬅️ NOWE
 };
 
 export default function ListPage() {
@@ -85,10 +86,35 @@ export default function ListPage() {
                   <td className="px-3 py-2 text-sm text-zinc-700">
                     {formatDate(row.submissionDate)}
                   </td>
-                  <td className="px-3 py-2 text-right">
-                    <Link to={`/submissions/${row.submissionId}`}>
-                      <DetailButton size="sm">Detale</DetailButton>
-                    </Link>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center justify-end gap-2">
+                      {/* Detale – zawsze aktywne */}
+                      <Link to={`/submissions/${row.submissionId}`}>
+                        <DetailButton size="sm">Detale</DetailButton>
+                      </Link>
+
+                      {/* Analizy – aktywne tylko gdy isAnalyzed === true */}
+                      {row.isAnalyzed ? (
+                        <Link to={`/submissions/${row.submissionId}/analyses`}>
+                          <button
+                            className="inline-flex items-center rounded-md border border-[#0f1e3a] bg-white text-[#0f1e3a]
+                                       px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 shadow-sm"
+                          >
+                            Analizy
+                          </button>
+                        </Link>
+                      ) : (
+                        <button
+                          disabled
+                          aria-disabled="true"
+                          title="Analizy będą dostępne po przetworzeniu"
+                          className="inline-flex items-center rounded-md border border-neutral-300 bg-neutral-100 text-neutral-400
+                                     px-3 py-1.5 text-sm font-medium cursor-not-allowed opacity-70"
+                        >
+                          Analizy
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

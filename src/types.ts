@@ -5,6 +5,7 @@ export type SubmissionListItem = {
   submissionId: string;
   submissionDate: string; // Instant → serializuje się jako ISO string
   testName: string;
+  isAnalyzed: boolean;
 };
 
 // === DETALE: GET /api/profiler/{submissionId} ===
