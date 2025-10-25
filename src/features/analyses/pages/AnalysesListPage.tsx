@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { fetchAnalyses, type InsightReport } from "../apiAnalyses";
+import { apiAnalyses } from "../apiAnalyses";
+import type { InsightReport } from '../../../types/profilerTypes';
+ 
 
 function BackLinkButton({ submissionId }: { submissionId: string }) {
   return (
     <Link
       to={`/submissions/${submissionId}`}
       className="no-print group inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium
-                 bg-[#0f1e3a] text-white border border-[#d4af37]/70 shadow-sm
-                 hover:bg-[#0b172d] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#d4af37]"
+                 bg-brand-900 text-white border border-brand-gold/70 shadow-sm
+                 hover:bg-[#0b172d] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-gold"
     >
       <svg className="h-4 w-4 -ml-1 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -29,7 +31,7 @@ export default function AnalysesListPage() {
     if (!submissionId) return;
     setLoading(true);
     setError(null);
-    fetchAnalyses(submissionId)
+    apiAnalyses.listBySubmission(submissionId)
       .then((r) => setData(r.sort((a, b) => b.createdAt.localeCompare(a.createdAt))))
       .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setLoading(false));
@@ -46,7 +48,7 @@ export default function AnalysesListPage() {
         <BackLinkButton submissionId={submissionId} />
       </div>
 
-      <h1 className="text-2xl font-semibold text-[#0f1e3a] mb-4 text-center">
+      <h1 className="text-2xl font-semibold text-brand-900 mb-4 text-center">
         Analizy AI – {submissionId}
       </h1>
 
@@ -82,7 +84,7 @@ export default function AnalysesListPage() {
                     <div className="flex items-center justify-end">
                       <Link
                         to={`/submissions/${submissionId}/analyses/${idx}`}
-                        className="inline-flex items-center rounded-md border border-[#0f1e3a] bg-white text-[#0f1e3a]
+                        className="inline-flex items-center rounded-md border border-brand-900 bg-white text-brand-900
                                    px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 shadow-sm"
                       >
                         Detale

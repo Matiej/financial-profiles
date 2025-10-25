@@ -1,0 +1,13 @@
+ 
+@import "tailwindcss";
+
+@theme {
+  --color-brand-900: #0f1e3a;
+  --color-brand-gold: #d4af37;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .card { break-inside: avoid; page-break-inside: avoid; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
