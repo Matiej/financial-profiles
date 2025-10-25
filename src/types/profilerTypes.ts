@@ -99,3 +99,18 @@ export type InsightReport = {
     nextSteps: string[];
   };
 };
+export type PayloadMode = "MINIMAL" | "ENRICHED" | "FULL";
+
+export type LatestStatus =
+  | {
+      submissionId: string;
+      status: "RUNNING" | "DONE" | "ERROR";
+      mode: PayloadMode;
+      error: string | null;
+      createdAt: string;
+      updatedAt: string;
+      expireAt: string | null;
+      isLocked: boolean;
+      remainingLockSeconds: number | null;
+    }
+  | null; // 204 noContent

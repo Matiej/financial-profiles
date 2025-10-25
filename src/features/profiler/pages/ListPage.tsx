@@ -2,15 +2,23 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiProfiler } from "../apiProfiler";
 import DetailButton from "../../../components/DetailButton";
-import type { SubmissionListItem } from "../../../types/profilerTypes";
+import type {
+  SubmissionListItem,
+  PayloadMode,
+} from "../../../types/profilerTypes";
+import { useAnalysisLock } from "../../../features/analyses/AnalysisLockContext";
+import { apiAnalyses } from "../../../features/analyses/apiAnalyses";
 
 export default function ListPage() {
   const [data, setData] = useState<SubmissionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { lock, setLockedFromStatus, startPolling } = useAnalysisLock();
+  const [modeById, setModeById] = useState<Record<string, PayloadMode>>({}); // per row
 
   useEffect(() => {
-    apiProfiler.list()
+    apiProfiler
+      .list()
       .then(setData)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -22,23 +30,41 @@ export default function ListPage() {
       timeStyle: "short",
     });
 
+  const handleModeChange = (submissionId: string, m: PayloadMode) => {
+    setModeById((prev) => ({ ...prev, [submissionId]: m }));
+  };
+
+  const sendToAnalysis = async (submissionId: string) => {
+    if (lock.locked) return;
+    const mode = modeById[submissionId] ?? "MINIMAL";
+    try {
+      await apiAnalyses.analyze(submissionId, mode, false, 1);
+      // po 202 Accepted zaczynamy polling statusu
+      startPolling(submissionId, () => {
+        // DONE — pokaż prosty popup (alert) i zaktualizuj globalny lock
+        alert("Analiza ukończona. Wyniki znajdziesz w zakładce „Analizy”.");
+      });
+      const st = await apiAnalyses.latestStatus(submissionId);
+      setLockedFromStatus(submissionId, st);
+    } catch (e: unknown) {
+      alert(`Nie udało się wysłać do analizy: ${e ?? String(e)}`);
+    }
+  };
+
   if (loading)
     return (
       <div className="flex justify-center items-center py-10 text-zinc-600">
         ⏳ Wczytywanie danych...
       </div>
     );
-
   if (error)
     return (
-      <div className="text-red-600 text-center py-10">
-        ❌ Błąd: {error}
-      </div>
+      <div className="text-red-600 text-center py-10">❌ Błąd: {error}</div>
     );
 
   return (
     <div className="max-w-5xl mx-auto">
-      <h1 className="text-2xl font-semibold text-brand-900 mb-4 text-center">
+      <h1 className="text-2xl font-semibold text-[#0f1e3a] mb-4 text-center">
         Lista wyników testu
       </h1>
 
@@ -60,51 +86,102 @@ export default function ListPage() {
             </thead>
 
             <tbody>
-              {data.map((row) => (
-                <tr
-                  key={row.submissionId}
-                  className="bg-white shadow-sm hover:shadow-md transition rounded-md"
-                >
-                  <td className="px-3 py-2">{row.clientName || "—"}</td>
-                  <td className="px-3 py-2 font-mono text-sm text-zinc-700">
-                    {row.clientId}
-                  </td>
-                  <td className="px-3 py-2 font-mono text-sm text-zinc-700">
-                    {row.submissionId}
-                  </td>
-                  <td className="px-3 py-2 text-sm text-zinc-700">
-                    {formatDate(row.submissionDate)}
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link to={`/submissions/${row.submissionId}`}>
-                        <DetailButton size="sm">Detale</DetailButton>
-                      </Link>
-
-                      {row.isAnalyzed ? (
-                        <Link to={`/submissions/${row.submissionId}/analyses`}>
-                          <button
-                            className="inline-flex items-center rounded-md border border-brand-900 bg-white text-brand-900
-                                       px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 shadow-sm"
-                          >
-                            Analizy
-                          </button>
-                        </Link>
-                      ) : (
-                        <button
-                          disabled
-                          aria-disabled="true"
-                          title="Analizy będą dostępne po przetworzeniu"
-                          className="inline-flex items-center rounded-md border border-neutral-300 bg-neutral-100 text-neutral-400
-                                     px-3 py-1.5 text-sm font-medium cursor-not-allowed opacity-70"
+              {data.map((row) => {
+                const disabled = lock.locked
+                const mode = modeById[row.submissionId] ?? "MINIMAL";
+                return (
+                  <tr
+                    key={row.submissionId}
+                    className="bg-white shadow-sm hover:shadow-md transition rounded-md"
+                  >
+                    <td className="px-3 py-2">{row.clientName || "—"}</td>
+                    <td className="px-3 py-2 font-mono text-sm text-zinc-700">
+                      {row.clientId}
+                    </td>
+                    <td className="px-3 py-2 font-mono text-sm text-zinc-700">
+                      {row.submissionId}
+                    </td>
+                    <td className="px-3 py-2 text-sm text-zinc-700">
+                      {formatDate(row.submissionDate)}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center justify-between gap-2">
+                        {/* Detale – po LEWEJ */}
+                        <Link
+                          to={`/submissions/${encodeURIComponent(
+                            row.submissionId
+                          )}`}
                         >
-                          Analizy
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                          <DetailButton size="sm">Detale</DetailButton>
+                        </Link>
+
+                        {/* Prawa strona – dwa guziki trzymają się razem */}
+                        <div className="flex items-center gap-2">
+                          {/* Wybór trybu */}
+                          <select
+                            value={mode}
+                            onChange={(e) =>
+                              handleModeChange(row.submissionId, e.target.value as PayloadMode)
+                            }
+                            className="inline-flex rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm"
+                            disabled={lock.locked}
+                            title="Wybierz zakres danych do analizy"
+                          >
+                            <option value="MINIMAL">Minimalny</option>
+                            <option value="ENRICHED">Wzbogacony</option>
+                            <option value="FULL">Pełny</option>
+                          </select>
+
+                          {/* Prześlij do analizy */}
+                          <button
+                            onClick={() => sendToAnalysis(row.submissionId)}
+                            disabled={disabled}
+                            className={[
+                              "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium shadow-sm border",
+                              disabled
+                                ? "cursor-not-allowed opacity-70 border-neutral-300 bg-neutral-100 text-neutral-400"
+                                : "border-[#0f1e3a] bg-white text-[#0f1e3a] hover:bg-neutral-50",
+                            ].join(" ")}
+                            title={
+                              lock.locked
+                                ? "Analiza zablokowana – poczekaj na zakończenie/karencję"
+                                : "Wyślij do analizy AI"
+                            }
+                          >
+                            Prześlij do analizy
+                          </button>
+
+                          {/* Analizy */}
+                          {row.isAnalyzed ? (
+                            <Link
+                              to={`/submissions/${encodeURIComponent(
+                                row.submissionId
+                              )}/analyses`}
+                            >
+                              <button
+                                className="inline-flex items-center rounded-md border border-[#0f1e3a] bg-white text-[#0f1e3a]
+                                           px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 shadow-sm"
+                              >
+                                Analizy
+                              </button>
+                            </Link>
+                          ) : (
+                            <button
+                              disabled
+                              aria-disabled="true"
+                              title="Analizy będą dostępne po przetworzeniu"
+                              className="inline-flex items-center rounded-md border border-neutral-300 bg-neutral-100 text-neutral-400
+                                         px-3 py-1.5 text-sm font-medium cursor-not-allowed opacity-70"
+                            >
+                              Analizy
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

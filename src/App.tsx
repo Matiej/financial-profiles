@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { AppRoutes } from "./app/router";
+import { NavLockCountdown } from "./features/analyses/AnalysisLockContext";
 
 function MenuLink({ to, label }: { to: string; label: string }) {
   return (
@@ -11,7 +12,7 @@ function MenuLink({ to, label }: { to: string; label: string }) {
           "px-5 py-2.5 text-[15px] font-medium",
           isActive
             ? "bg-[#0f1e3a] text-white border-[#0f1e3a]"
-            : "bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50"
+            : "bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50",
         ].join(" ")
       }
     >
@@ -19,7 +20,6 @@ function MenuLink({ to, label }: { to: string; label: string }) {
     </NavLink>
   );
 }
-
 
 export default function App() {
   return (
@@ -41,6 +41,7 @@ export default function App() {
             </Link>
 
             <nav className="no-print flex items-center gap-3">
+              <NavLockCountdown />
               <MenuLink to="/submissions" label="Profiler" />
               <MenuLink to="/dictionary" label="Słownik stwierdzeń" />
             </nav>
