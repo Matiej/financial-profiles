@@ -1,13 +1,56 @@
- 
-@import "tailwindcss";
+/* NIE importuj tu Tailwinda – jest już w index.css. */
 
-@theme {
-  --color-brand-900: #0f1e3a;
-  --color-brand-gold: #d4af37;
+/* Domyślny układ druku */
+@page {
+  size: A4;
+  margin: 12mm;
 }
 
+/* Globalne ustawienia druku */
 @media print {
+  html, body {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Ukryj elementy oznaczone jako "no-print" */
   .no-print { display: none !important; }
-  .card { break-inside: avoid; page-break-inside: avoid; }
-  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Sekcje, które nie powinny być rozdzielane między stronami */
+  .avoid-break,
+  .card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Wymuś nową stronę (opcjonalnie używaj klasy) */
+  .break-before {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Usuń dopiski URL przy linkach */
+  a[href]:after { content: "" !important; }
+
+  /* Media */
+  img, svg, canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Tabele */
+  table { border-collapse: collapse !important; }
+  th, td {
+    border: 1px solid #e5e7eb !important; /* zinc-200 */
+    padding: 4px 6px !important;
+  }
+
+  /* Bez cieni/animacji w druku */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
 }

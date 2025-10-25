@@ -10,8 +10,8 @@ function MenuLink({ to, label }: { to: string; label: string }) {
           "inline-flex items-center rounded-md border transition-colors",
           "px-5 py-2.5 text-[15px] font-medium",
           isActive
-            ? "bg-brand-900 text-white border-brand-900"
-            : "bg-white text-brand-900 border-brand-gold/60 hover:bg-neutral-50"
+            ? "bg-[#0f1e3a] text-white border-[#0f1e3a]"
+            : "bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50"
         ].join(" ")
       }
     >
@@ -19,6 +19,7 @@ function MenuLink({ to, label }: { to: string; label: string }) {
     </NavLink>
   );
 }
+
 
 export default function App() {
   return (
