@@ -1,27 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import DetailButton from "../components/DetailButton"; 
-
-type ProfiledClientAnswerShort = {
-  clientName: string;
-  clientId: string;
-  submissionId: string;
-  submissionDate: string;
-  testName: string;
-  isAnalyzed: boolean; // ⬅️ NOWE
-};
+import { apiProfiler } from "../apiProfiler";
+import DetailButton from "../../../components/DetailButton";
+import type { SubmissionListItem } from "../../../types/profilerTypes";
 
 export default function ListPage() {
-  const [data, setData] = useState<ProfiledClientAnswerShort[]>([]);
+  const [data, setData] = useState<SubmissionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/profiler")
-      .then((res) => {
-        if (!res.ok) throw new Error("Błąd podczas pobierania danych");
-        return res.json();
-      })
+    apiProfiler.list()
       .then(setData)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -49,7 +38,7 @@ export default function ListPage() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <h1 className="text-2xl font-semibold text-[#0f1e3a] mb-4 text-center">
+      <h1 className="text-2xl font-semibold text-brand-900 mb-4 text-center">
         Lista wyników testu
       </h1>
 
@@ -88,16 +77,14 @@ export default function ListPage() {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-2">
-                      {/* Detale – zawsze aktywne */}
                       <Link to={`/submissions/${row.submissionId}`}>
                         <DetailButton size="sm">Detale</DetailButton>
                       </Link>
 
-                      {/* Analizy – aktywne tylko gdy isAnalyzed === true */}
                       {row.isAnalyzed ? (
                         <Link to={`/submissions/${row.submissionId}/analyses`}>
                           <button
-                            className="inline-flex items-center rounded-md border border-[#0f1e3a] bg-white text-[#0f1e3a]
+                            className="inline-flex items-center rounded-md border border-brand-900 bg-white text-brand-900
                                        px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 shadow-sm"
                           >
                             Analizy

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { fetchAnalyses, type InsightReport, type CategoryInsight } from "../apiAnalyses";
+import { apiAnalyses } from "../apiAnalyses";
+import type { InsightReport, CategoryInsight } from "../../../types/profilerTypes";
 
 function BackLinkButton({ submissionId }: { submissionId: string }) {
   return (
@@ -10,8 +11,16 @@ function BackLinkButton({ submissionId }: { submissionId: string }) {
                  bg-[#0f1e3a] text-white border border-[#d4af37]/70 shadow-sm
                  hover:bg-[#0b172d] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#d4af37]"
     >
-      <svg className="h-4 w-4 -ml-1 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <svg
+        className="h-4 w-4 -ml-1 transition-transform group-hover:-translate-x-1"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
         <path d="M15 18l-6-6 6-6" />
       </svg>
       <span>Powrót do analiz</span>
@@ -39,12 +48,12 @@ function PrintButton() {
 
 const Pill = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium
-                   border-[#d4af37]/50 text-[#0f1e3a] bg-white">
+                   border-brand-gold/50 text-brand-900 bg-white">
     {children}
   </span>
 );
 
-export default function AnalysisDetailsPage() {
+export default function AnalysesDetailsPage() {
   const { submissionId, index } = useParams<{ submissionId: string; index: string }>();
   const [list, setList] = useState<InsightReport[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,7 +66,7 @@ export default function AnalysisDetailsPage() {
     if (!submissionId) return;
     setLoading(true);
     setError(null);
-    fetchAnalyses(submissionId)
+    apiAnalyses.listBySubmission(submissionId)
       .then((r) => r.sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
       .then(setList)
       .catch((e) => setError(e instanceof Error ? e.message : String(e)))
@@ -65,65 +74,42 @@ export default function AnalysisDetailsPage() {
   }, [submissionId]);
 
   return (
-    <div style={{ padding: 24, maxWidth: 1100, margin: "0 auto" }}>
-      <style>{`
-        :root { --muted:#667085; --border:#e5e7eb; }
-        .section-card { border:1px solid var(--border); border-radius:12px; padding:18px; background:white; }
-        .h2 { font-size:1.25rem; font-weight:600; margin:0 0 10px; color:#0f1e3a; }
-        .subtle { color: var(--muted); }
-        .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
-        .list { margin: 6px 0 0; padding-left: 18px; }
-        .badge-row { display:flex; flex-wrap:wrap; gap:6px; }
-        @media print {
-          .no-print { display: none !important; }
-          .section-card { break-inside: avoid; page-break-inside: avoid; }
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        }
-      `}</style>
-
-      <div className="no-print" style={{ display:"flex", justifyContent:"space-between", marginBottom:12, gap:12 }}>
+    <div className="p-6 max-w-[1100px] mx-auto">
+      <div className="no-print flex justify-between mb-3 gap-3">
         {submissionId && <BackLinkButton submissionId={submissionId} />}
         <PrintButton />
       </div>
 
-      <h1 className="text-2xl font-semibold text-[#0f1e3a] mb-2">Raport analizy AI</h1>
+      <h1 className="text-2xl font-semibold text-brand-900 mb-2">Raport analizy AI</h1>
 
       {loading && <div>Wczytywanie…</div>}
-      {error && <div style={{ color:"crimson" }}>Błąd: {error}</div>}
+      {error && <div className="text-red-600">Błąd: {error}</div>}
       {!loading && !data && !error && <div>Nie znaleziono analizy.</div>}
 
       {data && (
         <>
-          {/* META */}
-          <div className="subtle" style={{ marginBottom: 14 }}>
+          <div className="text-zinc-600 mb-3">
             <div><b>Test:</b> {data.testName}</div>
-            <div>
-              <b>Klient:</b> {data.clientName || "—"} • <b>Client ID:</b> {data.clientId}
-            </div>
-            <div>
-              <b>Submission:</b> {data.submissionId} • <b>Utworzono:</b>{" "}
-              {new Date(data.createdAt).toLocaleString("pl-PL", { dateStyle:"medium", timeStyle:"short" })}
-            </div>
-            <div>
-              <b>Model:</b> {data.model} • <b>Schema:</b> {data.schemaName} ({data.schemaVersion})
-            </div>
+            <div><b>Klient:</b> {data.clientName || "—"} • <b>Client ID:</b> {data.clientId}</div>
+            <div><b>Submission:</b> {data.submissionId} • <b>Utworzono:</b> {new Date(data.createdAt).toLocaleString("pl-PL", { dateStyle:"medium", timeStyle:"short" })}</div>
+            <div><b>Model:</b> {data.model} • <b>Schema:</b> {data.schemaName} ({data.schemaVersion})</div>
           </div>
 
-          {/* PODSUMOWANIE KLIENTKI */}
-          <div className="section-card" style={{ marginBottom: 16 }}>
-            <div className="h2">Podsumowanie</div>
-            <div style={{ marginBottom: 8 }}>
-              <div className="subtle" style={{ marginBottom: 4 }}>Motywy przewodnie</div>
-              <div className="badge-row">
+          <div className="avoid-break border border-zinc-200 rounded-xl p-4 bg-white mb-4">
+            <div className="text-xl font-semibold mb-2">Podsumowanie</div>
+
+            <div className="mb-2">
+              <div className="text-zinc-600 mb-1">Motywy przewodnie</div>
+              <div className="flex flex-wrap gap-1.5">
                 {data.insightReportStructuredAiResponseDto.clientSummary.keyThemes.map((t, i) => (
                   <Pill key={i}>{t}</Pill>
                 ))}
               </div>
             </div>
 
-            <div style={{ marginTop: 10 }}>
-              <div className="subtle" style={{ marginBottom: 4 }}>Dominujące kategorie</div>
-              <div className="badge-row">
+            <div className="mt-2">
+              <div className="text-zinc-600 mb-1">Dominujące kategorie</div>
+              <div className="flex flex-wrap gap-1.5">
                 {data.insightReportStructuredAiResponseDto.clientSummary.dominantCategories.map((d, i) => {
                   const pct = Math.round((d.balanceIndex ?? 0) * 100);
                   return (
@@ -137,60 +123,50 @@ export default function AnalysisDetailsPage() {
               </div>
             </div>
 
-            <p style={{ marginTop: 12 }}>{data.insightReportStructuredAiResponseDto.clientSummary.overallNarrativePl}</p>
+            <p className="mt-3">{data.insightReportStructuredAiResponseDto.clientSummary.overallNarrativePl}</p>
           </div>
 
-          {/* WGLĄDY KATEGORII */}
-          <div style={{ display:"grid", gap: 14 }}>
+          <div className="grid gap-3">
             {data.insightReportStructuredAiResponseDto.categoryInsights.map((c: CategoryInsight) => (
-              <div key={c.categoryId} className="section-card">
-                <div className="h2">{c.categoryLabelPl}</div>
+              <div key={c.categoryId} className="avoid-break border border-zinc-200 rounded-xl p-4 bg-white">
+                <div className="text-xl font-semibold mb-2">{c.categoryLabelPl}</div>
 
-                <div className="grid-2">
-                  {/* Mocne strony */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <div className="subtle">Mocne strony</div>
-                    <ul className="list">
+                    <div className="text-zinc-600">Mocne strony</div>
+                    <ul className="mt-1 pl-5 list-disc">
                       {c.strengthsPl.map((s, i) => <li key={`s-${i}`}>{s}</li>)}
                     </ul>
                   </div>
-
-                  {/* Ryzyka */}
                   <div>
-                    <div className="subtle">Ryzyka</div>
-                    <ul className="list">
+                    <div className="text-zinc-600">Ryzyka</div>
+                    <ul className="mt-1 pl-5 list-disc">
                       {c.risksPl.map((s, i) => <li key={`r-${i}`}>{s}</li>)}
                     </ul>
                   </div>
                 </div>
 
-                {/* Sprzeczności */}
                 {c.contradictionsPl?.length > 0 && (
-                  <div style={{ marginTop: 10 }}>
-                    <div className="subtle">Sprzeczności do obserwacji</div>
-                    <ul className="list">
+                  <div className="mt-2">
+                    <div className="text-zinc-600">Sprzeczności do obserwacji</div>
+                    <ul className="mt-1 pl-5 list-disc">
                       {c.contradictionsPl.map((s, i) => <li key={`c-${i}`}>{s}</li>)}
                     </ul>
                   </div>
                 )}
 
-                {/* Rekomendowane interwencje */}
                 {c.recommendedInterventionsDto?.length > 0 && (
-                  <div style={{ marginTop: 10 }}>
-                    <div className="subtle">Rekomendowane interwencje</div>
-                    <div style={{ display:"grid", gap:10 }}>
+                  <div className="mt-2">
+                    <div className="text-zinc-600">Rekomendowane interwencje</div>
+                    <div className="grid gap-2">
                       {c.recommendedInterventionsDto.map((it, i) => (
-                        <div key={`i-${i}`} style={{ border:"1px solid var(--border)", borderRadius:10, padding:12 }}>
-                          <div className="badge-row" style={{ marginBottom:6 }}>
+                        <div key={`i-${i}`} className="border border-zinc-200 rounded-lg p-3">
+                          <div className="mb-1">
                             <Pill>{it.type}</Pill>
                           </div>
-                          <div className="font-medium" style={{ marginBottom:4 }}>{it.titlePl}</div>
-                          <div style={{ fontSize:14, color:"#0f1e3a" }}>
-                            <b>Po co:</b> {it.whyPl}
-                          </div>
-                          <div style={{ fontSize:14, marginTop:4 }}>
-                            <b>Jak:</b> {it.howPl}
-                          </div>
+                          <div className="font-medium mb-1">{it.titlePl}</div>
+                          <div className="text-sm text-brand-900"><b>Po co:</b> {it.whyPl}</div>
+                          <div className="text-sm mt-1"><b>Jak:</b> {it.howPl}</div>
                         </div>
                       ))}
                     </div>
@@ -200,11 +176,10 @@ export default function AnalysisDetailsPage() {
             ))}
           </div>
 
-          {/* NEXT STEPS */}
           {data.insightReportStructuredAiResponseDto.nextSteps?.length > 0 && (
-            <div className="section-card" style={{ marginTop: 16 }}>
-              <div className="h2">Następne kroki</div>
-              <ul className="list">
+            <div className="avoid-break border border-zinc-200 rounded-xl p-4 bg-white mt-4">
+              <div className="text-xl font-semibold mb-2">Następne kroki</div>
+              <ul className="pl-5 list-disc">
                 {data.insightReportStructuredAiResponseDto.nextSteps.map((s, i) => <li key={i}>{s}</li>)}
               </ul>
             </div>

@@ -1,15 +1,29 @@
-import "./App.css";
-import { Routes, Route, Navigate, Link, NavLink } from "react-router-dom";
-import ListPage from "./pages/ListPage";
-import DetailsPage from "./pages/DetailsPage";
-import StatementsDictionaryPage from "./pages/StatementsDictionaryPage";
-import AnalysesListPage from "./pages/AnalysesListPage";
-import AnalysisDetailsPage from "./pages/AnalysisDetailsPage";
+import { Link, NavLink } from "react-router-dom";
+import { AppRoutes } from "./app/router";
 
-function App() {
+function MenuLink({ to, label }: { to: string; label: string }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        [
+          "inline-flex items-center rounded-md border transition-colors",
+          "px-5 py-2.5 text-[15px] font-medium",
+          isActive
+            ? "bg-[#0f1e3a] text-white border-[#0f1e3a]"
+            : "bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50"
+        ].join(" ")
+      }
+    >
+      {label}
+    </NavLink>
+  );
+}
+
+
+export default function App() {
   return (
     <div className="min-h-dvh bg-white">
-      {/* HEADER (sticky) */}
       <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/75">
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex items-center justify-between gap-6 py-4">
@@ -22,11 +36,10 @@ function App() {
               <img
                 src="/logo.png"
                 alt="Agnieszka Kotlonek – Hipnoterapia w Biznesie"
-                className="h-14 w-auto md:h-16"             /* ↑ większe logo */
+                className="h-14 w-auto md:h-16"
               />
             </Link>
 
-            {/* MENU */}
             <nav className="no-print flex items-center gap-3">
               <MenuLink to="/submissions" label="Profiler" />
               <MenuLink to="/dictionary" label="Słownik stwierdzeń" />
@@ -35,40 +48,9 @@ function App() {
         </div>
       </header>
 
-      {/* CONTENT */}
       <main className="mx-auto max-w-6xl px-4 py-6">
-        <Routes>
-          <Route path="/" element={<Navigate to="/submissions" replace />} />
-          <Route path="/submissions" element={<ListPage />} />
-          <Route path="/submissions/:submissionId" element={<DetailsPage />} />
-          <Route path="/submissions/:submissionId/analyses" element={<AnalysesListPage />} />
-          <Route path="/submissions/:submissionId/analyses/:index" element={<AnalysisDetailsPage />} />
-          <Route path="/dictionary" element={<StatementsDictionaryPage />} />
-          <Route path="*" element={<div className="p-6">404</div>} />
-        </Routes>
+        <AppRoutes />
       </main>
     </div>
   );
 }
-
-function MenuLink({ to, label }: { to: string; label: string }) {
-  return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        [
-          "inline-flex items-center rounded-md border transition-colors",
-          "px-5 py-2.5",                 /* ↑ większy padding */
-          "text-[15px] font-medium",     /* ↑ ciut większy tekst */
-          isActive
-            ? "bg-[#0f1e3a] text-white border-[#0f1e3a]"
-            : "bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50"
-        ].join(" ")
-      }
-    >
-      {label}
-    </NavLink>
-  );
-}
-
-export default App;
