@@ -91,6 +91,7 @@ export type InsightReport = {
   testName: string;
   model: string;
   schemaName: string;
+  payloadMode: PayloadMode | null
   schemaVersion: string;
   createdAt: string; // ISO
   insightReportStructuredAiResponseDto: {
@@ -104,7 +105,7 @@ export type PayloadMode = "MINIMAL" | "ENRICHED" | "FULL";
 export type LatestStatus =
   | {
       submissionId: string;
-      status: "RUNNING" | "DONE" | "ERROR";
+      status: string;
       mode: PayloadMode;
       error: string | null;
       createdAt: string;

@@ -1,38 +1,25 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import type { LatestStatus, PayloadMode } from "../../types/profilerTypes";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { apiAnalyses } from "../analyses/apiAnalyses";
+import type { PayloadMode, LatestStatus } from "../../types/profilerTypes";
 
 type LockState = {
   locked: boolean;
   mode?: PayloadMode;
   until?: Date | null;
-  remaining?: number | null;
+  remaining?: number | null;        // sekundy do końca karencji (gdy DONE)
   sourceSubmissionId?: string | null;
 };
 
 type Ctx = {
   lock: LockState;
-  setLockedFromStatus: (submissionId: string, st: LatestStatus) => void;
+  setLockedFromStatus: (submissionIdOrNull: string | null, st: LatestStatus) => void;
   clearLock: () => void;
-  startPolling: (
-    submissionId: string,
-    onDone: (st: LatestStatus) => void
-  ) => void;
+  startPolling: (submissionId: string, onDone: (st: LatestStatus) => void) => void;
 };
 
 const AnalysisLockContext = createContext<Ctx | null>(null);
 
-export function AnalysisLockProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function AnalysisLockProvider({ children }: { children: React.ReactNode }) {
   const [lock, setLock] = useState<LockState>({ locked: false });
   const pollRef = useRef<number | null>(null);
 
@@ -43,31 +30,49 @@ export function AnalysisLockProvider({
     }
   };
 
-  const setLockedFromStatus = (_submissionId: string, st: LatestStatus) => {
+  // 🔑 Centralna logika ustawiania/odblokowania
+  const setLockedFromStatus = (submissionIdOrNull: string | null, st: LatestStatus) => {
     if (!st) {
+      // 204 No Content ⇒ odblokuj wszystko
       setLock({ locked: false });
       return;
     }
-    if (st.status === "RUNNING" && st.isLocked) {
+
+    const status = st.status;
+    const remaining = st.remainingLockSeconds ?? null;
+
+    // DONE + brak karencji lub karencja = 0 ⇒ OD-BLO-KUJ (nawet jeśli isLocked=true przez stary TTL)
+    if (status === "DONE" && (remaining === null || remaining <= 0)) {
+      setLock({ locked: false });
+      return;
+    }
+
+    if (status === "RUNNING") {
       setLock({
         locked: true,
-        mode: st.mode,
+        mode: (st.mode ?? undefined) as PayloadMode | undefined,
         until: null,
-        remaining: null,
-        sourceSubmissionId: _submissionId,
+        remaining: null, // RUNNING bez licznika
+        sourceSubmissionId: submissionIdOrNull ?? st.submissionId ?? null,
       });
-    } else if (st.status === "DONE" && st.isLocked) {
+      return;
+    }
+
+    // DONE + karencja > 0 ⇒ lock z odliczaniem
+    if (status === "DONE" && st.isLocked && remaining !== null && remaining > 0) {
       const until = st.expireAt ? new Date(st.expireAt) : null;
       setLock({
         locked: true,
-        mode: st.mode,
+        mode: (st.mode ?? undefined) as PayloadMode | undefined,
         until,
-        remaining: st.remainingLockSeconds ?? null,
-        sourceSubmissionId: _submissionId,
+        remaining,
+        sourceSubmissionId: submissionIdOrNull ?? st.submissionId ?? null,
       });
-    } else {
-      setLock({ locked: false });
+      return;
     }
+
+    // Inne statusy / brak locka ⇒ odblokuj
+    setLock({ locked: false });
   };
 
   const clearLock = () => {
@@ -75,27 +80,26 @@ export function AnalysisLockProvider({
     setLock({ locked: false });
   };
 
-  // odliczanie co sekundę przy karencji
+  // ⏱️ Lokalny licznik – gdy remaining spada do 0 ⇒ odblokuj
   useEffect(() => {
     let t: number | null = null;
     if (lock.locked && (lock.remaining ?? null) !== null) {
       t = window.setInterval(() => {
-        setLock((prev) => {
-          const r = (prev.remaining ?? 0) - 1;
-          if (r <= 0) return { locked: false };
+        setLock(prev => {
+          const r0 = prev.remaining ?? 0;
+          const r = r0 - 1;
+          if (r <= 0) {
+            return { locked: false }; // koniec karencji ⇒ odblokuj
+          }
           return { ...prev, remaining: r };
         });
       }, 1000);
     }
-    return () => {
-      if (t) window.clearInterval(t);
-    };
+    return () => { if (t) window.clearInterval(t); };
   }, [lock.locked, lock.remaining]);
 
-  const startPolling = (
-    submissionId: string,
-    onDone: (st: LatestStatus) => void
-  ) => {
+  // 📡 Polling po kliknięciu „Prześlij do analizy”
+  const startPolling = (submissionId: string, onDone: (st: LatestStatus) => void) => {
     clearPolling();
     pollRef.current = window.setInterval(async () => {
       try {
@@ -106,15 +110,29 @@ export function AnalysisLockProvider({
           onDone(st);
         }
       } catch {
-        // ignore tmp errors
+        // ignore tmp erros
       }
     }, 2000);
   };
 
+ 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const st = await apiAnalyses.latestGlobalStatus();
+        if (cancelled) return;
+        const sid = st && "submissionId" in st ? (st).submissionId as string : null;
+        setLockedFromStatus(sid, st);
+      } catch {
+        // brak statusu ≈ odblokowane – nic nie robimy
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   return (
-    <AnalysisLockContext.Provider
-      value={{ lock, setLockedFromStatus, clearLock, startPolling }}
-    >
+    <AnalysisLockContext.Provider value={{ lock, setLockedFromStatus, clearLock, startPolling }}>
       {children}
     </AnalysisLockContext.Provider>
   );
@@ -123,12 +141,11 @@ export function AnalysisLockProvider({
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAnalysisLock() {
   const ctx = useContext(AnalysisLockContext);
-  if (!ctx)
-    throw new Error("useAnalysisLock must be used within AnalysisLockProvider");
+  if (!ctx) throw new Error("useAnalysisLock must be used within AnalysisLockProvider");
   return ctx;
 }
 
-// Komponent do headera: licznik karencji
+// (opcjonalnie) komponent licznika w headerze
 export function NavLockCountdown() {
   const { lock } = useAnalysisLock();
   if (!lock.locked) return null;
@@ -141,10 +158,8 @@ export function NavLockCountdown() {
   };
 
   return (
-    <div
-      className="no-print inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium
-                    border border-amber-300 bg-amber-50 text-amber-900"
-    >
+    <div className="no-print inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium
+                    border border-amber-300 bg-amber-50 text-amber-900">
       {seconds !== null ? (
         <>
           <span>Karencja analizy</span>
