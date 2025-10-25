@@ -4,6 +4,12 @@ import { apiAnalyses } from "../apiAnalyses";
 import { apiProfiler } from "../../profiler/apiProfiler"; // <-- dodany import do meta
 import type { InsightReport } from "../../../types/profilerTypes";
 
+const MODE_PL: Record<string, string> = {
+  MINIMAL: "Minimalny",
+  ENRICHED: "Wzbogacony",
+  FULL: "Pełny",
+};
+
 function BackLinkButton() {
   return (
     <Link
@@ -148,6 +154,7 @@ export default function AnalysesListPage() {
                 <th className="px-3 py-2">Model</th>
                 <th className="px-3 py-2">Schema</th>
                 <th className="px-3 py-2">Wersja</th>
+                <th className="px-3 py-2">Dane wejściowe</th>
                 <th className="px-3 py-2">Test</th>
                 <th className="px-3 py-2 text-right">Akcje</th>
               </tr>
@@ -162,6 +169,9 @@ export default function AnalysesListPage() {
                   <td className="px-3 py-2 font-mono text-sm">{row.model}</td>
                   <td className="px-3 py-2">{row.schemaName}</td>
                   <td className="px-3 py-2">{row.schemaVersion}</td>
+                  <td className="px-3 py-2">
+                    {MODE_PL[row.payloadMode ?? ""] ?? "—"}
+                  </td>
                   <td className="px-3 py-2">{row.testName}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end">
