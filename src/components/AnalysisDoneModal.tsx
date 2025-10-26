@@ -1,5 +1,3 @@
-import React from "react";
-
 type Props = {
   open: boolean;
   status: "DONE" | "FAILED";
