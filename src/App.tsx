@@ -1,6 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import { AppRoutes } from "./app/router";
 import { NavLockCountdown } from "./features/analyses/AnalysisLockContext";
+import RouteAwareLockRefresher from "./app/RouteAwareLockRefresher";
 
 function MenuLink({ to, label }: { to: string; label: string }) {
   return (
@@ -24,6 +25,7 @@ function MenuLink({ to, label }: { to: string; label: string }) {
 export default function App() {
   return (
     <div className="min-h-dvh bg-white">
+      <RouteAwareLockRefresher />
       <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/75">
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex items-center justify-between gap-6 py-4">

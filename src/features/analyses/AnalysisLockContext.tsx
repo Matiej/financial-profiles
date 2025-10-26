@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { apiAnalyses } from "../analyses/apiAnalyses";
 import type { PayloadMode, LatestStatus } from "../../types/profilerTypes";
 
@@ -6,7 +12,7 @@ type LockState = {
   locked: boolean;
   mode?: PayloadMode;
   until?: Date | null;
-  remaining?: number | null;        // sekundy do końca karencji (gdy DONE)
+  remaining?: number | null; // sekundy do końca karencji (gdy DONE/FAILED)
   sourceSubmissionId?: string | null;
 };
 
@@ -15,18 +21,30 @@ type Ctx = {
   setLockedFromStatus: (submissionIdOrNull: string | null, st: LatestStatus) => void;
   clearLock: () => void;
   startPolling: (submissionId: string, onDone: (st: LatestStatus) => void) => void;
+  refreshGlobalStatus: () => Promise<void>;
 };
 
 const AnalysisLockContext = createContext<Ctx | null>(null);
 
 export function AnalysisLockProvider({ children }: { children: React.ReactNode }) {
   const [lock, setLock] = useState<LockState>({ locked: false });
+
+  // interwał „twardy” (co 2s po kliknięciu Wyślij)
   const pollRef = useRef<number | null>(null);
+  // interwał „miękki” (co 15s, gdy jest lock — żeby odświeżać zegar/nowe joby)
+  const softPollRef = useRef<number | null>(null);
 
   const clearPolling = () => {
     if (pollRef.current) {
       window.clearInterval(pollRef.current);
       pollRef.current = null;
+    }
+  };
+
+  const clearSoftPolling = () => {
+    if (softPollRef.current) {
+      window.clearInterval(softPollRef.current);
+      softPollRef.current = null;
     }
   };
 
@@ -41,32 +59,38 @@ export function AnalysisLockProvider({ children }: { children: React.ReactNode }
     const status = st.status;
     const remaining = st.remainingLockSeconds ?? null;
 
-    // DONE + brak karencji lub karencja = 0 ⇒ OD-BLO-KUJ (nawet jeśli isLocked=true przez stary TTL)
-    if (status === "DONE" && (remaining === null || remaining <= 0)) {
+    // DONE/FAILED + brak karencji lub karencja = 0 ⇒ OD-BLO-KUJ
+    if ((status === "DONE" || status === "FAILED") && (remaining === null || remaining <= 0)) {
       setLock({ locked: false });
       return;
     }
 
+    // RUNNING ⇒ lock bez licznika
     if (status === "RUNNING") {
       setLock({
         locked: true,
         mode: (st.mode ?? undefined) as PayloadMode | undefined,
         until: null,
-        remaining: null, // RUNNING bez licznika
+        remaining: null,
         sourceSubmissionId: submissionIdOrNull ?? st.submissionId ?? null,
       });
       return;
     }
 
-    // DONE + karencja > 0 ⇒ lock z odliczaniem
-    if (status === "DONE" && st.isLocked && remaining !== null && remaining > 0) {
+    // DONE/FAILED + karencja > 0 ⇒ lock z odliczaniem
+    if ((status === "DONE" || status === "FAILED") && st.isLocked && remaining !== null && remaining > 0) {
       const until = st.expireAt ? new Date(st.expireAt) : null;
-      setLock({
-        locked: true,
-        mode: (st.mode ?? undefined) as PayloadMode | undefined,
-        until,
-        remaining,
-        sourceSubmissionId: submissionIdOrNull ?? st.submissionId ?? null,
+      setLock((prev) => {
+        // jeśli backend zwróci WIĘKSZĄ karencję (np. nowy job), przyjmij większą
+        const nextRemaining =
+          prev.locked && prev.remaining != null ? Math.max(prev.remaining, remaining) : remaining;
+        return {
+          locked: true,
+          mode: (st.mode ?? prev.mode ?? undefined) as PayloadMode | undefined,
+          until,
+          remaining: nextRemaining,
+          sourceSubmissionId: submissionIdOrNull ?? st.submissionId ?? prev.sourceSubmissionId ?? null,
+        };
       });
       return;
     }
@@ -77,25 +101,25 @@ export function AnalysisLockProvider({ children }: { children: React.ReactNode }
 
   const clearLock = () => {
     clearPolling();
+    clearSoftPolling();
     setLock({ locked: false });
   };
 
-  // ⏱️ Lokalny licznik – gdy remaining spada do 0 ⇒ odblokuj
+  // ⏱️ Lokalny sekundnik – gdy remaining spada do 0 ⇒ odblokuj
   useEffect(() => {
     let t: number | null = null;
     if (lock.locked && (lock.remaining ?? null) !== null) {
       t = window.setInterval(() => {
-        setLock(prev => {
+        setLock((prev) => {
           const r0 = prev.remaining ?? 0;
           const r = r0 - 1;
-          if (r <= 0) {
-            return { locked: false }; // koniec karencji ⇒ odblokuj
-          }
-          return { ...prev, remaining: r };
+          return r <= 0 ? { locked: false } : { ...prev, remaining: r };
         });
       }, 1000);
     }
-    return () => { if (t) window.clearInterval(t); };
+    return () => {
+      if (t) window.clearInterval(t);
+    };
   }, [lock.locked, lock.remaining]);
 
   // 📡 Polling po kliknięciu „Prześlij do analizy”
@@ -105,34 +129,64 @@ export function AnalysisLockProvider({ children }: { children: React.ReactNode }
       try {
         const st = await apiAnalyses.latestStatus(submissionId);
         setLockedFromStatus(submissionId, st);
-        if (st && st.status === "DONE") {
+        if (st && (st.status === "DONE" || st.status === "FAILED")) {
           clearPolling();
           onDone(st);
         }
       } catch {
-        // ignore tmp erros
+        // ignoruj chwilowe błędy
       }
     }, 2000);
   };
 
- 
+  // 🔄 miękki polling globalny co 15 s, tylko gdy lock aktywny
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const st = await apiAnalyses.latestGlobalStatus();
-        if (cancelled) return;
-        const sid = st && "submissionId" in st ? (st).submissionId as string : null;
-        setLockedFromStatus(sid, st);
-      } catch {
-        // brak statusu ≈ odblokowane – nic nie robimy
-      }
-    })();
-    return () => { cancelled = true; };
+    clearSoftPolling();
+    if (lock.locked) {
+      softPollRef.current = window.setInterval(async () => {
+        try {
+          const st = await apiAnalyses.latestGlobalStatus();
+          const sid = st?.submissionId ?? null;
+          setLockedFromStatus(sid, st);
+        } catch {
+          // ignorujemy
+        }
+      }, 15000);
+    }
+    return () => clearSoftPolling();
+  }, [lock.locked]);
+
+  // 🟢 sprawdzenie globalne na starcie / reloadzie
+  const refreshGlobalStatus = async () => {
+    try {
+      const st = await apiAnalyses.latestGlobalStatus();
+      const sid = st?.submissionId ?? null;
+      setLockedFromStatus(sid, st);
+    } catch {
+      // brak statusu ≈ odblokowane – nic nie robimy
+    }
+  };
+
+  useEffect(() => {
+    // pojedynczy startowy check (drugi, z cancelled — USUNIĘTY jako nadmiarowy)
+    refreshGlobalStatus();
+    // cleanup wszystkich interwałów na odmontowanie providera
+    return () => {
+      clearPolling();
+      clearSoftPolling();
+    };
   }, []);
 
   return (
-    <AnalysisLockContext.Provider value={{ lock, setLockedFromStatus, clearLock, startPolling }}>
+    <AnalysisLockContext.Provider
+      value={{
+        lock,
+        setLockedFromStatus,
+        clearLock,
+        startPolling,
+        refreshGlobalStatus,
+      }}
+    >
       {children}
     </AnalysisLockContext.Provider>
   );
