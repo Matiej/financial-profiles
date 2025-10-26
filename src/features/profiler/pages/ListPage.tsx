@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apiProfiler } from "../apiProfiler";
 import DetailButton from "../../../components/DetailButton";
 import type {
@@ -8,13 +8,21 @@ import type {
 } from "../../../types/profilerTypes";
 import { useAnalysisLock } from "../../../features/analyses/AnalysisLockContext";
 import { apiAnalyses } from "../../../features/analyses/apiAnalyses";
+import AnalysisDoneModal from "../../../components/AnalysisDoneModal";
 
 export default function ListPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState<SubmissionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { lock, setLockedFromStatus, startPolling } = useAnalysisLock();
   const [modeById, setModeById] = useState<Record<string, PayloadMode>>({}); // per row
+  const [modal, setModal] = useState<{
+    open: boolean;
+    status: "DONE" | "FAILED";
+    mode?: string | null;
+    submissionId?: string | null;
+  }>({ open: false, status: "DONE", mode: null, submissionId: null });
 
   useEffect(() => {
     apiProfiler
@@ -39,13 +47,25 @@ export default function ListPage() {
     const mode = modeById[submissionId] ?? "MINIMAL";
     try {
       await apiAnalyses.analyze(submissionId, mode, false, 1);
-      // po 202 Accepted zaczynamy polling statusu
-      startPolling(submissionId, () => {
-        // DONE — pokaż prosty popup (alert) i zaktualizuj globalny lock
-        alert("Analiza ukończona. Wyniki znajdziesz w zakładce „Analizy”.");
-      });
+      // after 202 starts pulling statuses
       const st = await apiAnalyses.latestStatus(submissionId);
       setLockedFromStatus(submissionId, st);
+
+      startPolling(submissionId, (statusDto) => {
+        if (!statusDto) return;
+        // alert("Analiza ukończona. Wyniki znajdziesz w zakładce „Analizy”.");
+        if (statusDto.status === "DONE" || statusDto.status === "FAILED") {
+          setModal({
+            open: true,
+            status: statusDto.status as "DONE" | "FAILED",
+            mode: statusDto.mode ?? null,
+            submissionId,
+          });
+        }
+      });
+
+      // const st = await apiAnalyses.latestStatus(submissionId);
+      // setLockedFromStatus(submissionId, st);
     } catch (e: unknown) {
       alert(`Nie udało się wysłać do analizy: ${e ?? String(e)}`);
     }
@@ -87,7 +107,7 @@ export default function ListPage() {
 
             <tbody>
               {data.map((row) => {
-                const disabled = lock.locked
+                const disabled = lock.locked;
                 const mode = modeById[row.submissionId] ?? "MINIMAL";
                 return (
                   <tr
@@ -121,7 +141,10 @@ export default function ListPage() {
                           <select
                             value={mode}
                             onChange={(e) =>
-                              handleModeChange(row.submissionId, e.target.value as PayloadMode)
+                              handleModeChange(
+                                row.submissionId,
+                                e.target.value as PayloadMode
+                              )
                             }
                             className="inline-flex rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm"
                             disabled={lock.locked}
@@ -186,6 +209,22 @@ export default function ListPage() {
           </table>
         </div>
       )}
+      <AnalysisDoneModal
+        open={modal.open}
+        status={modal.status}
+        mode={modal.mode}
+        onClose={() => setModal((m) => ({ ...m, open: false }))}
+        onGoToAnalyses={
+          modal.submissionId
+            ? () =>
+                navigate(
+                  `/submissions/${encodeURIComponent(
+                    modal.submissionId!
+                  )}/analyses`
+                )
+            : undefined
+        }
+      />
     </div>
   );
 }
