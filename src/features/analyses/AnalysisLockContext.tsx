@@ -215,6 +215,7 @@ export function AnalysisLockProvider({
       clearPolling();
       clearSoftPolling();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

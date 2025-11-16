@@ -22,6 +22,65 @@ function MenuLink({ to, label }: { to: string; label: string }) {
   );
 }
 
+function CalculatorMenu() {
+  return (
+    <div className="relative group">
+      <button
+        className="inline-flex items-center rounded-md border transition-colors
+                   px-5 py-2.5 text-[15px] font-medium
+                   bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50"
+        type="button"
+      >
+        Kalkulatory
+        <svg
+          className="ml-2 h-4 w-4"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 8l4 4 4-4" />
+        </svg>
+      </button>
+
+      <div
+        className="absolute right-0 mt-1 w-48 rounded-md border border-zinc-200 bg-white shadow-lg
+                   py-1 text-sm z-50 hidden group-hover:block"
+      >
+        <NavLink
+          to="/calculators/names"
+          className={({ isActive }) =>
+            [
+              "block px-4 py-2",
+              isActive
+                ? "bg-[#0f1e3a] text-white"
+                : "text-[#0f1e3a] hover:bg-neutral-50",
+            ].join(" ")
+          }
+        >
+          Nazwy
+        </NavLink>
+        <NavLink
+          to="/calculators/dates"
+          className={({ isActive }) =>
+            [
+              "block px-4 py-2",
+              isActive
+                ? "bg-[#0f1e3a] text-white"
+                : "text-[#0f1e3a] hover:bg-neutral-50",
+            ].join(" ")
+          }
+        >
+          Daty
+        </NavLink>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <div className="min-h-dvh bg-white">
@@ -46,6 +105,7 @@ export default function App() {
               <NavLockCountdown />
               <MenuLink to="/submissions" label="Profiler" />
               <MenuLink to="/dictionary" label="Słownik stwierdzeń" />
+              <CalculatorMenu />
             </nav>
           </div>
         </div>
