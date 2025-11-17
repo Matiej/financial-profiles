@@ -1,5 +1,5 @@
 import { fetchJSON } from "../../lib/httpClient";
-import type { NumerologyPhraseResult } from "../../types/ncalculatorTypes";
+import type { NumerologyDatesResult, NumerologyPhraseResult } from "../../types/ncalculatorTypes";
 
 export const apiNumerology = {
     calculatePhrase: (phrase: string): Promise<NumerologyPhraseResult> =>
@@ -9,5 +9,17 @@ export const apiNumerology = {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ phrase }),
+        }),
+
+    calculateDates: (
+        birthDate: string,
+        referenceDate: string
+    ): Promise<NumerologyDatesResult> =>
+        fetchJSON("/ncalculator/dates", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ birthDate, referenceDate }),
         }),
 };
