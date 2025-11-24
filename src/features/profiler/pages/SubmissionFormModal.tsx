@@ -6,8 +6,9 @@ type Props = {
   onClose: () => void;
   onSubmit: (payload: {
     clientName: string;
+    clientEmail: string;
     testName: string;
-    durationMin: number;
+    durationDays: number;
   }) => Promise<void> | void;
   initial?: Submission | null; // jeśli edycja, wchodzą dane
 };
@@ -21,31 +22,34 @@ export function SubmissionFormModal({
   const isEdit = !!initial;
 
   const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
   const [testName, setTestName] = useState("");
-  const [durationMin, setDurationMin] = useState<number | "">("");
+  const [durationDays, setDurationDays] = useState<number | "">("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-   useEffect(() => {
+  useEffect(() => {
     if (!open) return;
     setError(null);
     if (initial) {
       setClientName(initial.clientName ?? "");
+      setClientEmail(initial.clientEmail ?? "");
       setTestName(initial.testName ?? "");
       // przy edycji szacujemy startową wartość z remainingSeconds
-      const approxMin = Math.max(1, Math.ceil(initial.remainingSeconds / 60));
-      setDurationMin(approxMin);
+      const approxDays = Math.max(1, Math.ceil(initial.remainingSeconds / 60));
+      setDurationDays(approxDays);
     } else {
       setClientName("");
+      setClientEmail("");
       setTestName("");
-      setDurationMin("");
+      setDurationDays("");
     }
   }, [open, initial]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (durationMin === "" || durationMin <= 0) {
-      setError("Podaj czas trwania w minutach (min. 1).");
+    if (durationDays === "" || durationDays <= 0 || durationDays > 99) {
+      setError("Podaj czas trwania w dniach (zakres 1–99).");
       return;
     }
     if (!clientName.trim()) {
@@ -62,8 +66,9 @@ export function SubmissionFormModal({
       setError(null);
       await onSubmit({
         clientName: clientName.trim(),
+        clientEmail: clientEmail.trim(),
         testName: testName.trim(),
-        durationMin: durationMin,
+        durationDays: durationDays,
       });
       onClose();
     } catch (e: unknown) {
@@ -111,6 +116,20 @@ export function SubmissionFormModal({
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-1">
+                E-mail
+              </label>
+              <input
+                type="email"
+                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                value={clientEmail}
+                onChange={(e) => setClientEmail(e.target.value)}
+                placeholder="np. jan.kowlaski@email.com"
+                disabled={saving}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Nazwa testu
               </label>
               <input
@@ -125,19 +144,19 @@ export function SubmissionFormModal({
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Czas trwania (minuty)
+                Czas trwania (dni)
               </label>
               <input
                 type="number"
                 min={1}
                 className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-                value={durationMin}
+                value={durationDays}
                 onChange={(e) =>
-                  setDurationMin(
+                  setDurationDays(
                     e.target.value === "" ? "" : Number(e.target.value)
                   )
                 }
-                placeholder="np. 30"
+                placeholder="np. 7"
                 disabled={saving}
               />
             </div>

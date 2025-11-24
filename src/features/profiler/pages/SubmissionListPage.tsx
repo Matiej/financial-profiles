@@ -205,15 +205,17 @@ export default function SubmissionListPage() {
 
   const handleSubmitForm = async (payload: {
     clientName: string;
+    clientEmail: string;
     testName: string;
-    durationMin: number;
+    durationDays: number;
   }) => {
     if (editTarget) {
       // UPDATE – bez clientId
       const updated = await apiSubmissions.update(editTarget.submissionId, {
         clientName: payload.clientName,
+        clientEmail: payload.clientEmail,
         testName: payload.testName,
-        durationMin: payload.durationMin,
+        durationDays: payload.durationDays,
       });
       setData((prev) =>
         prev.map((it) =>
@@ -225,8 +227,10 @@ export default function SubmissionListPage() {
       const created = await apiSubmissions.create({
         clientId: "fe_test_id",
         clientName: payload.clientName,
+        clientEmail: payload.clientEmail,
+        orderId: "admin_order",
         testName: payload.testName,
-        durationMin: payload.durationMin,
+        durationDays: payload.durationDays,
       });
       setData((prev) => [created, ...prev]);
     }
