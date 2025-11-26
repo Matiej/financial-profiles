@@ -8,6 +8,7 @@ import NameCalculatorPage from "../features/numerology-calculator/pages/NameCalc
 import DateCalculatorPage from "../features/numerology-calculator/pages/DateCalculatorPage";
 import SubmissionDetailPage from "../features/profiler/pages/SubmissionDetailPage";
 import SubmissionListPage from "../features/profiler/pages/SubmissionListPage";
+import FpTestListPage from "../features/fptest/pages/FpTestListPage";
 
 export function AppRoutes() {
   return (
@@ -31,6 +32,7 @@ export function AppRoutes() {
         path="/submissions/:submissionId/analyses/:index"
         element={<AnalysisDetailsPage />}
       />
+      <Route path="/tests" element={<FpTestListPage />} />
       <Route path="/dictionary" element={<StatementsDictionaryPage />} />
       <Route path="/calculators/names" element={<NameCalculatorPage />} />
       <Route path="/calculators/dates" element={<DateCalculatorPage />} />
