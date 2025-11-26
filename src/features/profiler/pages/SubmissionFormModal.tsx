@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Submission } from "../../../types/submissionTypes";
+import type { FpTest } from "../../../types/fpTestTypes";
+import { apiSubmissions } from "../apiSubmissions";
 
 type Props = {
   open: boolean;
@@ -7,7 +9,7 @@ type Props = {
   onSubmit: (payload: {
     clientName: string;
     clientEmail: string;
-    testName: string;
+    testId: string;
     durationDays: number;
   }) => Promise<void> | void;
   initial?: Submission | null; // jeśli edycja, wchodzą dane
@@ -23,27 +25,47 @@ export function SubmissionFormModal({
 
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
-  const [testName, setTestName] = useState("");
+  // const [testName, setTestName] = useState("");
   const [durationDays, setDurationDays] = useState<number | "">("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [tests, setTests] = useState<FpTest[]>([]);
+  const [testsLoading, setTestsLoading] = useState(false);
+  const [selectedTestId, setSelectedTestId] = useState<string>("");
+
   useEffect(() => {
     if (!open) return;
     setError(null);
+
     if (initial) {
       setClientName(initial.clientName ?? "");
       setClientEmail(initial.clientEmail ?? "");
-      setTestName(initial.testName ?? "");
+
+      // setTestName(initial.testName ?? "");
       // przy edycji szacujemy startową wartość z remainingSeconds
       const approxDays = Math.max(1, Math.ceil(initial.remainingSeconds / 60));
       setDurationDays(approxDays);
     } else {
       setClientName("");
       setClientEmail("");
-      setTestName("");
+      // setTestName("");
       setDurationDays("");
+      setSelectedTestId("");
     }
+
+    setTestsLoading(true);
+    apiSubmissions
+      .listTests()
+      .then((list) => setTests(list))
+      .catch((e: unknown) => {
+        setError(
+          e instanceof Error ? e.message : "Nie udało się pobrać listy testów."
+        );
+      })
+      .finally(() => {
+        setTestsLoading(false);
+      });
   }, [open, initial]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,8 +78,8 @@ export function SubmissionFormModal({
       setError("Podaj imię / nazwę klienta.");
       return;
     }
-    if (!testName.trim()) {
-      setError("Podaj nazwę testu.");
+    if (!selectedTestId) {
+      setError("Wybierz test z listy.");
       return;
     }
 
@@ -67,7 +89,7 @@ export function SubmissionFormModal({
       await onSubmit({
         clientName: clientName.trim(),
         clientEmail: clientEmail.trim(),
-        testName: testName.trim(),
+        testId: selectedTestId.trim(),
         durationDays: durationDays,
       });
       onClose();
@@ -130,6 +152,39 @@ export function SubmissionFormModal({
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-1">
+                Test
+              </label>
+              <select
+                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm bg-white"
+                value={selectedTestId}
+                onChange={(e) => setSelectedTestId(e.target.value)}
+                disabled={saving || testsLoading}
+              >
+                <option value="">
+                  {testsLoading
+                    ? "Ładowanie testów…"
+                    : "Wybierz test z listy"}
+                </option>
+                {tests.map((t) => (
+                  <option key={t.testId} value={t.testId}>
+                    {t.testName}
+                  </option>
+                ))}
+              </select>
+
+              {/* NEW: mały podgląd opisu wybranego testu */}
+              {selectedTestId && (
+                <p className="mt-1 text-xs text-zinc-500">
+                  {
+                    tests.find((t) => t.testId === selectedTestId)
+                      ?.descriptionBefore
+                  }
+                </p>
+              )}
+            </div>
+
+            {/* <div>
+              <label className="block text-sm font-medium text-zinc-700 mb-1">
                 Nazwa testu
               </label>
               <input
@@ -140,7 +195,7 @@ export function SubmissionFormModal({
                 placeholder="np. Profil finansowy 8 stylów"
                 disabled={saving}
               />
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-1">

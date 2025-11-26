@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiSubmissions } from "../apiSubmissions";
 import type { Submission } from "../../../types/submissionTypes";
 import { SubmissionFormModal } from "./SubmissionFormModal";
+import type { FpTest } from "../../../types/fpTestTypes";
 
 const TEST_BASE_URL = "https://prof-test/t"; // tmp
 
@@ -135,6 +136,9 @@ export default function SubmissionListPage() {
     url: null,
   });
 
+  const [tests, setTests] = useState<FpTest[]>([]);
+  const [testsLoading, setTestsLoading] = useState(false);
+
   // 1) Pobranie danych z backendu (i nadpisanie remainingSeconds z serwera)
   useEffect(() => {
     (async () => {
@@ -173,6 +177,31 @@ export default function SubmissionListPage() {
     return () => window.clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setError(null);
+      setTestsLoading(true);
+      try {
+        const [submissions, testsList] = await Promise.all([
+          apiSubmissions.list(),
+          apiSubmissions.listTests(),
+        ]);
+        setData(submissions);
+        setTests(testsList);
+      } catch (e: unknown) {
+        setError(
+          e instanceof Error
+            ? e.message
+            : "Nie udało się pobrać zgłoszeń lub testów."
+        );
+      } finally {
+        setLoading(false);
+        setTestsLoading(false);
+      }
+    })();
+  }, []);
+
   const handleNew = () => {
     setEditTarget(null);
     setModalOpen(true);
@@ -206,7 +235,7 @@ export default function SubmissionListPage() {
   const handleSubmitForm = async (payload: {
     clientName: string;
     clientEmail: string;
-    testName: string;
+    testId: string;
     durationDays: number;
   }) => {
     if (editTarget) {
@@ -214,7 +243,7 @@ export default function SubmissionListPage() {
       const updated = await apiSubmissions.update(editTarget.submissionId, {
         clientName: payload.clientName,
         clientEmail: payload.clientEmail,
-        testName: payload.testName,
+        testId: payload.testId,
         durationDays: payload.durationDays,
       });
       setData((prev) =>
@@ -229,7 +258,7 @@ export default function SubmissionListPage() {
         clientName: payload.clientName,
         clientEmail: payload.clientEmail,
         orderId: "admin_order",
-        testName: payload.testName,
+        testId: payload.testId,
         durationDays: payload.durationDays,
       });
       setData((prev) => [created, ...prev]);
@@ -294,6 +323,10 @@ export default function SubmissionListPage() {
                 const isExpired = row.remainingSeconds <= 0;
                 const rowBg = isExpired ? "bg-neutral-50" : "bg-white";
 
+                const testName =
+                  tests.find((t) => t.testId === row.testId)?.testName ??
+                  `Test ${row.testId}`;
+
                 return (
                   <tr
                     key={row.submissionId}
@@ -301,7 +334,7 @@ export default function SubmissionListPage() {
                   >
                     <td className="px-3 py-2">{row.clientName || "—"}</td>
                     <td className="px-3 py-2 text-sm text-zinc-700">
-                      {row.testName}
+                      {testsLoading ? "Ładowanie testów…" : testName}
                     </td>
                     <td className="px-3 py-2 text-sm">
                       {row.status === "OPEN" ? (

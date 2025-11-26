@@ -6,7 +6,7 @@ export interface Submission {
   clientName: string;
   clientEmail: string;
   orderId: string;
-  testName: string;
+  testId: string;
   status: SubmissionStatus;
   remainingSeconds: number;   //backend count it
   publicToken: string;
@@ -18,13 +18,13 @@ export interface SubmissionCreatePayload {
   clientName: string;
   clientEmail: string;
   orderId: string;
-  testName: string;
+  testId: string;
   durationDays: number; 
 }
 
 export interface SubmissionUpdatePayload {
   clientName: string;
   clientEmail: string;
-  testName: string;
+  testId: string;
   durationDays: number;
 }
