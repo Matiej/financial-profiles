@@ -140,22 +140,22 @@ export default function SubmissionListPage() {
   const [testsLoading, setTestsLoading] = useState(false);
 
   // 1) Pobranie danych z backendu (i nadpisanie remainingSeconds z serwera)
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const list = await apiSubmissions.list();
-        setData(list);
-      } catch (e: unknown) {
-        setError(
-          e instanceof Error ? e.message : "Nie udało się pobrać zgłoszeń."
-        );
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     setLoading(true);
+  //     setError(null);
+  //     try {
+  //       const list = await apiSubmissions.list();
+  //       setData(list);
+  //     } catch (e: unknown) {
+  //       setError(
+  //         e instanceof Error ? e.message : "Nie udało się pobrać zgłoszeń."
+  //       );
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   })();
+  // }, []);
 
   // 2) Lokalny zegarek — co sekundę zmniejsza remainingSeconds w stanie.
   //    Przy każdym odświeżeniu z backendu (np. F5) dostajesz nowy stan startowy.
@@ -311,6 +311,7 @@ export default function SubmissionListPage() {
             <thead>
               <tr className="text-left text-sm text-zinc-500 border-b border-zinc-100">
                 <th className="px-3 py-2">Klient</th>
+                <th className="px-3 py-2">E-mail</th>
                 <th className="px-3 py-2">Test</th>
                 <th className="px-3 py-2">Status</th>
                 <th className="px-3 py-2">Pozostały czas</th>
@@ -333,6 +334,9 @@ export default function SubmissionListPage() {
                     className={`${rowBg} shadow-sm hover:shadow-md transition rounded-md`}
                   >
                     <td className="px-3 py-2">{row.clientName || "—"}</td>
+                    <td className="px-3 py-2 text-sm text-zinc-700">
+                      {row.clientEmail || "—"}
+                    </td>
                     <td className="px-3 py-2 text-sm text-zinc-700">
                       {testsLoading ? "Ładowanie testów…" : testName}
                     </td>

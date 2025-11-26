@@ -25,7 +25,7 @@ export function SubmissionFormModal({
 
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
-  // const [testName, setTestName] = useState("");
+
   const [durationDays, setDurationDays] = useState<number | "">("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,15 +41,11 @@ export function SubmissionFormModal({
     if (initial) {
       setClientName(initial.clientName ?? "");
       setClientEmail(initial.clientEmail ?? "");
-
-      // setTestName(initial.testName ?? "");
-      // przy edycji szacujemy startową wartość z remainingSeconds
-      const approxDays = Math.max(1, Math.ceil(initial.remainingSeconds / 60));
-      setDurationDays(approxDays);
+      setDurationDays(0);
+      setSelectedTestId(initial.testId ?? "");
     } else {
       setClientName("");
       setClientEmail("");
-      // setTestName("");
       setDurationDays("");
       setSelectedTestId("");
     }
@@ -161,9 +157,7 @@ export function SubmissionFormModal({
                 disabled={saving || testsLoading}
               >
                 <option value="">
-                  {testsLoading
-                    ? "Ładowanie testów…"
-                    : "Wybierz test z listy"}
+                  {testsLoading ? "Ładowanie testów…" : "Wybierz test z listy"}
                 </option>
                 {tests.map((t) => (
                   <option key={t.testId} value={t.testId}>
@@ -182,20 +176,6 @@ export function SubmissionFormModal({
                 </p>
               )}
             </div>
-
-            {/* <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Nazwa testu
-              </label>
-              <input
-                type="text"
-                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-                value={testName}
-                onChange={(e) => setTestName(e.target.value)}
-                placeholder="np. Profil finansowy 8 stylów"
-                disabled={saving}
-              />
-            </div> */}
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-1">

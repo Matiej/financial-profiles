@@ -76,6 +76,20 @@ function ProfilerMenu() {
         >
           Oczekujące zgłoszenia
         </NavLink>
+
+        <NavLink
+          to="/tests"
+          className={({ isActive }) =>
+            [
+              "block px-4 py-2",
+              isActive
+                ? "bg-[#0f1e3a] text-white"
+                : "text-[#0f1e3a] hover:bg-neutral-50",
+            ].join(" ")
+          }
+        >
+          Testy
+        </NavLink>
       </div>
     </div>
   );
