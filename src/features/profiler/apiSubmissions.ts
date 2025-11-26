@@ -1,4 +1,5 @@
 import { fetchJSON } from "../../lib/httpClient";
+import type { FpTest } from "../../types/fpTestTypes";
 import type {
   Submission,
   SubmissionCreatePayload,
@@ -6,6 +7,10 @@ import type {
 } from "../../types/submissionTypes";
 
 export const apiSubmissions = {
+
+  // GET /api/pftest
+  listTests: (): Promise<FpTest[]> => fetchJSON("/pftest"),
+
   list: (): Promise<Submission[]> => fetchJSON("/submission"),
 
   get: (submissionId: string): Promise<Submission> =>
@@ -37,8 +42,7 @@ export const apiSubmissions = {
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new Error(
-        `HTTP ${res.status} ${res.statusText}${
-          text ? ` – ${text}` : ""
+        `HTTP ${res.status} ${res.statusText}${text ? ` – ${text}` : ""
         }`
       );
     }
