@@ -139,26 +139,6 @@ export default function SubmissionListPage() {
   const [tests, setTests] = useState<FpTest[]>([]);
   const [testsLoading, setTestsLoading] = useState(false);
 
-  // 1) Pobranie danych z backendu (i nadpisanie remainingSeconds z serwera)
-  // useEffect(() => {
-  //   (async () => {
-  //     setLoading(true);
-  //     setError(null);
-  //     try {
-  //       const list = await apiSubmissions.list();
-  //       setData(list);
-  //     } catch (e: unknown) {
-  //       setError(
-  //         e instanceof Error ? e.message : "Nie udało się pobrać zgłoszeń."
-  //       );
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   })();
-  // }, []);
-
-  // 2) Lokalny zegarek — co sekundę zmniejsza remainingSeconds w stanie.
-  //    Przy każdym odświeżeniu z backendu (np. F5) dostajesz nowy stan startowy.
   useEffect(() => {
     const id = window.setInterval(() => {
       setData((prev) =>
@@ -369,17 +349,34 @@ export default function SubmissionListPage() {
                         </button>
 
                         <button
-                          onClick={() => handleEdit(row)}
-                          className="inline-flex items-center rounded-md border border-neutral-300 bg-white text-neutral-700
-                                     px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 shadow-sm"
+                          onClick={
+                            row.status === "DONE"
+                              ? undefined
+                              : () => handleEdit(row)
+                          }
+                          disabled={row.status === "DONE"}
+                          className={`inline-flex items-center rounded-md border border-neutral-300 bg-white text-neutral-700
+                                      px-3 py-1.5 text-xs font-medium shadow-sm ${
+                                        row.status === "DONE"
+                                          ? "opacity-50 cursor-not-allowed"
+                                          : "hover:bg-neutral-50"
+                                      }`}
                         >
                           Edytuj
                         </button>
 
                         <button
-                          onClick={() => handleDelete(row)}
-                          className="inline-flex items-center rounded-md border border-red-200 bg-red-50 text-red-700
-                                     px-3 py-1.5 text-xs font-medium hover:bg-red-100 shadow-sm"
+                          onClick={
+                            row.status === "DONE"
+                              ? undefined
+                              : () => handleDelete(row)
+                          }
+                          disabled={row.status === "DONE"}
+                          className={`inline-flex items-center rounded-md border border-red-200 bg-red-50 text-red-700 px-3 py-1.5 text-xs font-medium shadow-sm ${
+                            row.status === "DONE"
+                              ? "opacity-50 cursor-not-allowed"
+                              : "hover:bg-red-100"
+                          }`}
                         >
                           Usuń
                         </button>
