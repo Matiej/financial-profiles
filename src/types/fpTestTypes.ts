@@ -10,6 +10,7 @@ export interface FpTest {
   descriptionBefore: string | null;
   descriptionAfter: string | null;
   fpTestStatementDtoList: FpTestStatement[];
+  submissionIds: string[];
   createdAt: string | null;   // ISO
   updatedAt: string | null;   // ISO
 }

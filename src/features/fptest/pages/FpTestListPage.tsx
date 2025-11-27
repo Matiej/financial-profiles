@@ -3,6 +3,8 @@ import type { FpTest } from "../../../types/fpTestTypes";
 import { apiFpTests } from "../apiFpTests";
 import { FpTestFormModal } from "./FpTestFormModal";
 import { TestIdModal } from "./TestIdModal";
+import { ApiError } from "../../../lib/httpClient";
+import React from "react";
 
 function formatCreatedAt(iso: string | null): string {
   if (!iso) return "—";
@@ -76,6 +78,18 @@ export default function FpTestListPage() {
       await apiFpTests.delete(test.testId);
       setData((prev) => prev.filter((t) => t.testId !== test.testId));
     } catch (e: unknown) {
+      if (e instanceof ApiError) {
+        if (e.code === "FP_TEST_DELETE_ERROR") {
+          alert(
+            "Nie można usunąć testu, ponieważ był już użyty w co najmniej jednym zgłoszeniu."
+          );
+          return;
+        }
+
+        alert(`Błąd: ${e.message}`);
+        return;
+      }
+
       alert(
         `Nie udało się usunąć testu: ${
           e instanceof Error ? e.message : String(e)
@@ -90,27 +104,45 @@ export default function FpTestListPage() {
     descriptionAfter: string;
     statementKeys: string[];
   }) => {
-    if (editTarget) {
-      const updated = await apiFpTests.update(editTarget.testId, {
-        testId: editTarget.testId,
-        testName: payload.testName,
-        descriptionBefore: payload.descriptionBefore,
-        descriptionAfter: payload.descriptionAfter,
-        statementKeys: payload.statementKeys,
-      });
+    try {
+      if (editTarget) {
+        const updated = await apiFpTests.update(editTarget.testId, {
+          testId: editTarget.testId,
+          testName: payload.testName,
+          descriptionBefore: payload.descriptionBefore,
+          descriptionAfter: payload.descriptionAfter,
+          statementKeys: payload.statementKeys,
+        });
 
-      setData((prev) =>
-        prev.map((t) => (t.testId === updated.testId ? updated : t))
-      );
-    } else {
-      const created = await apiFpTests.create({
-        testName: payload.testName,
-        descriptionBefore: payload.descriptionBefore,
-        descriptionAfter: payload.descriptionAfter,
-        statementKeys: payload.statementKeys,
-      });
+        setData((prev) =>
+          prev.map((t) => (t.testId === updated.testId ? updated : t))
+        );
+      } else {
+        const created = await apiFpTests.create({
+          testName: payload.testName,
+          descriptionBefore: payload.descriptionBefore,
+          descriptionAfter: payload.descriptionAfter,
+          statementKeys: payload.statementKeys,
+        });
 
-      setData((prev) => [created, ...prev]);
+        setData((prev) => [created, ...prev]);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const code = (e as any)?.code;
+      if (code === "FP_TEST_EDIT_ERROR") {
+        alert(
+          "Nie można zmodyfikować par przekonań, ponieważ test był już użyty w zgłoszeniach."
+        );
+      } else {
+        alert(
+          `Nie udało się zapisać testu: ${
+            e instanceof Error ? e.message : String(e)
+          }`
+        );
+      }
+      throw e;
     }
   };
 
@@ -175,39 +207,59 @@ export default function FpTestListPage() {
                 const count = test.fpTestStatementDtoList.length;
                 const expanded = expandedTestIds.has(test.testId);
 
+                const submissionIds = test.submissionIds ?? [];
+                const isUsed = submissionIds.length > 0;
+
                 return (
-                  <>
+                  <React.Fragment key={test.testId}>
                     <tr
                       key={test.testId}
                       className="bg-white shadow-sm hover:shadow-md transition rounded-md"
                     >
                       <td className="px-3 py-2">
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => toggleExpanded(test.testId)}
-                            className="text-zinc-500 hover:text-zinc-700"
-                            aria-label={
-                              expanded
-                                ? "Zwiń szczegóły testu"
-                                : "Rozwiń szczegóły testu"
+                        <div className="flex items-center justify-between gap-3">
+                          {/* lewa część: strzałka + nazwa */}
+                          <div className="flex items-center gap-2 min-w-0">
+                            <button
+                              type="button"
+                              onClick={() => toggleExpanded(test.testId)}
+                              className="text-zinc-500 hover:text-zinc-700 shrink-0"
+                              aria-label={
+                                expanded
+                                  ? "Zwiń szczegóły testu"
+                                  : "Rozwiń szczegóły testu"
+                              }
+                            >
+                              <span className="inline-block text-xs">
+                                {expanded ? "▾" : "▸"}
+                              </span>
+                            </button>
+                            <span className="font-medium text-[#0f1e3a] truncate">
+                              {test.testName}
+                            </span>
+                          </div>
+
+                          {/* prawa część: badge z zawsze zarezerwowanym miejscem */}
+                          <span
+                            className={
+                              "ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] uppercase tracking-wide border " +
+                              (isUsed
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : "invisible border-transparent") // niewidoczne, ale zajmuje miejsce
                             }
                           >
-                            <span className="inline-block text-xs">
-                              {expanded ? "▾" : "▸"}
-                            </span>
-                          </button>
-                          <span className="font-medium text-[#0f1e3a]">
-                            {test.testName}
+                            Używany
                           </span>
                         </div>
                       </td>
+
                       <td className="px-3 py-2 text-sm text-zinc-700">
                         {count}
                       </td>
                       <td className="px-3 py-2 text-sm text-zinc-700">
                         {formatCreatedAt(test.createdAt)}
                       </td>
+
                       <td className="px-3 py-2">
                         <div className="flex items-center justify-end gap-2">
                           <button
@@ -218,21 +270,46 @@ export default function FpTestListPage() {
                           >
                             ID testu
                           </button>
+
                           <button
                             onClick={() => handleEdit(test)}
                             className="inline-flex items-center rounded-md border border-neutral-300 bg-white text-neutral-700
-                                       px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 shadow-sm"
+                 px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 shadow-sm"
                           >
                             Edytuj
                           </button>
 
                           <button
-                            onClick={() => handleDelete(test)}
-                            className="inline-flex items-center rounded-md border border-red-200 bg-red-50 text-red-700
-                                       px-3 py-1.5 text-xs font-medium hover:bg-red-100 shadow-sm"
+                            onClick={() => {
+                              if (!isUsed) handleDelete(test);
+                            }}
+                            disabled={isUsed}
+                            className={
+                              "inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm " +
+                              (isUsed
+                                ? "border-red-100 bg-red-50 text-red-300 cursor-not-allowed"
+                                : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100")
+                            }
                           >
                             Usuń
                           </button>
+
+                          {/* stałe miejsce na "?" */}
+                          <span
+                            className={
+                              "inline-flex items-center justify-center w-5 h-5 rounded-full border text-[11px] text-zinc-500 " +
+                              (isUsed
+                                ? "border-zinc-300 cursor-default"
+                                : "border-transparent opacity-0 pointer-events-none")
+                            }
+                            title={
+                              isUsed
+                                ? "Test został już użyty w co najmniej jednym zgłoszeniu. Usunięcie jest zablokowane."
+                                : ""
+                            }
+                          >
+                            ?
+                          </span>
                         </div>
                       </td>
                     </tr>
@@ -272,7 +349,7 @@ export default function FpTestListPage() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })}
             </tbody>

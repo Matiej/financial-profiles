@@ -17,6 +17,9 @@ type Props = {
 export function FpTestFormModal({ open, onClose, onSubmit, initial }: Props) {
   const isEdit = !!initial;
 
+  const submissionIds = initial?.submissionIds ?? [];
+  const isUsed = submissionIds.length > 0;
+
   const [testName, setTestName] = useState("");
   const [descriptionBefore, setDescriptionBefore] = useState("");
   const [descriptionAfter, setDescriptionAfter] = useState("");
@@ -66,6 +69,7 @@ export function FpTestFormModal({ open, onClose, onSubmit, initial }: Props) {
   }, [open, initial]);
 
   const toggleStatement = (key: string) => {
+    if (isUsed) return;
     setSelectedKeys((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
@@ -76,6 +80,7 @@ export function FpTestFormModal({ open, onClose, onSubmit, initial }: Props) {
     selectedKeys.length === availableStatements.length;
 
   const toggleSelectAll = () => {
+    if (isUsed) return;
     if (allSelected) {
       setSelectedKeys([]);
     } else {
@@ -177,22 +182,26 @@ export function FpTestFormModal({ open, onClose, onSubmit, initial }: Props) {
             </div>
 
             {/* wybór statementów */}
-            {/* <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-zinc-700">
-                  Pary przekonań w teście
-                </label>
-                <span className="text-xs text-zinc-600">
-                  Wybrane pary:{" "}
-                  <span className="font-semibold">{selectedKeys.length}</span>
-                </span>
-              </div> */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
                   <label className="block text-sm font-medium text-zinc-700">
                     Pary przekonań w teście
                   </label>
+
+                  {isUsed && (
+                    <div className="flex items-center gap-1 text-xs text-zinc-500">
+                      <span
+                        className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-zinc-400 text-[10px] cursor-default"
+                        title="Test został już użyty w zgłoszeniach. Możesz zmienić nazwę i opisy, ale nie możesz zmieniać listy par przekonań."
+                      >
+                        ?
+                      </span>
+                      <span>
+                        Lista par jest zablokowana, bo test był już użyty.
+                      </span>
+                    </div>
+                  )}
 
                   <label className="inline-flex items-center gap-1 text-xs text-zinc-600">
                     <input
@@ -203,7 +212,8 @@ export function FpTestFormModal({ open, onClose, onSubmit, initial }: Props) {
                       disabled={
                         saving ||
                         loadingStatements ||
-                        availableStatements.length === 0
+                        availableStatements.length === 0 ||
+                        isUsed
                       }
                     />
                     <span>
@@ -241,7 +251,7 @@ export function FpTestFormModal({ open, onClose, onSubmit, initial }: Props) {
                             className="mt-1"
                             checked={checked}
                             onChange={() => toggleStatement(st.statementKey)}
-                            disabled={saving}
+                            disabled={saving || isUsed}
                           />
                           <div>
                             <div className="font-medium text-[#0f1e3a]">
