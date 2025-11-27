@@ -1,12 +1,19 @@
 import { type FormEvent, useState } from "react";
 import { apiNumerology } from "../apiNumerology";
 import type { NumerologyPhraseResult } from "../../../types/ncalculatorTypes";
+import {
+  LETTER_VIBRATION,
+  VOWELS,
+  isDigit,
+  getNumberForChar,
+} from "../../../lib/letterVibrations";
 
 export default function NameCalculatorPage() {
   const [phrase, setPhrase] = useState("");
   const [result, setResult] = useState<NumerologyPhraseResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [calculatedPhrase, setCalculatedPhrase] = useState<string | null>(null);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -21,8 +28,10 @@ export default function NameCalculatorPage() {
     try {
       const res = await apiNumerology.calculatePhrase(trimmed);
       setResult(res);
+      setCalculatedPhrase(trimmed);
     } catch (err) {
       setResult(null);
+      setCalculatedPhrase(null);
       setError(
         err instanceof Error ? err.message : "Nie udało się obliczyć wibracji."
       );
@@ -31,7 +40,47 @@ export default function NameCalculatorPage() {
     }
   };
 
-  const displayPhrase = phrase.trim().toUpperCase();
+  const displayPhrase = (calculatedPhrase ?? "").toUpperCase();
+
+  let letters: string[] = [];
+  let vowelRow: (number | "")[] = [];
+  let consonantRow: (number | "")[] = [];
+  let lettersRowNumbers: number[] = [];
+  let lettersSum: number | null = null;
+  let lettersReduced: string | null = null;
+
+  if (result && displayPhrase) {
+    // bierzemy tylko znaki, które są literą z mapy lub cyfrą
+    letters = Array.from(displayPhrase).filter((ch) => {
+      return isDigit(ch) || LETTER_VIBRATION[ch] !== undefined;
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    lettersRowNumbers = letters
+      .map((ch) => getNumberForChar(ch))
+      .filter((n): n is number => n !== null);
+
+    const [fullPart, reducedPart] = result.vibration
+      .split("/")
+      .map((s) => s.trim());
+
+    lettersSum = fullPart ? Number(fullPart) || null : null;
+    lettersReduced = reducedPart && reducedPart.length > 0 ? reducedPart : null;
+
+    vowelRow = letters.map((ch) => {
+      const num = getNumberForChar(ch);
+      if (num === null) return "";
+      return VOWELS.has(ch) ? num : "";
+    });
+
+    consonantRow = letters.map((ch) => {
+      const num = getNumberForChar(ch);
+      if (num === null) return "";
+
+      if (isDigit(ch)) return "";
+      return VOWELS.has(ch) ? "" : num;
+    });
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -75,7 +124,9 @@ export default function NameCalculatorPage() {
             <div className="text-sm tracking-wide text-zinc-500 mb-1">
               NAZWA
             </div>
-            <div className="text-2xl font-semibold tracking-[0.18em] text-[#0f1e3a] uppercase">
+            <div
+              className="text-lg sm:text-2xl font-semibold tracking-[0.18em] text-[#0f1e3a] uppercase break-words max-w-full px-2"
+            >
               {displayPhrase || "—"}
             </div>
           </div>
@@ -119,6 +170,82 @@ export default function NameCalculatorPage() {
             np. <span className="font-mono">24/6</span>. Cyfry w nazwie są
             wliczane 1:1 do całości.
           </div>
+
+          {/* --- NOWA SEKCJA: TABELA ROZKŁADU LITER --- */}
+          {letters.length > 0 && (
+            <div className="mt-8">
+              <div className="text-center mb-3">
+                <div className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">
+                  Rozkład liter i wibracji
+                </div>
+                <div className="text-xs text-zinc-500">
+                  Samogłoski, litery, spółgłoski
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-center text-sm border-separate border-spacing-y-1">
+                  <tbody>
+                    {/* Wiersz samogłoski */}
+                    <tr className="bg-emerald-50">
+                      {vowelRow.map((val, idx) => (
+                        <td key={`vowel-${idx}`} className="px-1 py-1">
+                          {val !== "" ? (
+                            <span className="font-mono text-[13px]">{val}</span>
+                          ) : (
+                            ""
+                          )}
+                        </td>
+                      ))}
+                      <td className="px-2">=</td>
+                      <td className="px-2 text-left font-semibold">
+                        {result.vowelsResult}
+                      </td>
+                    </tr>
+
+                    {/* Wiersz litery */}
+                    <tr className="bg-neutral-50">
+                      {letters.map((ch, idx) => (
+                        <td key={`letter-${idx}`} className="px-1 py-1">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span className="text-[13px] font-semibold">
+                              {ch}
+                            </span>
+                            <span className="text-[11px] text-zinc-500 font-mono">
+                              {getNumberForChar(ch) ?? ""}
+                            </span>
+                          </div>
+                        </td>
+                      ))}
+                      <td className="px-2">=</td>
+                      <td className="px-2 text-left font-semibold">
+                        {lettersSum !== null ? lettersSum : ""}
+                        {lettersReduced && lettersSum !== null
+                          ? ` = ${lettersReduced}`
+                          : ""}
+                      </td>
+                    </tr>
+
+                    {/* Wiersz spółgłoski */}
+                    <tr className="bg-sky-50">
+                      {consonantRow.map((val, idx) => (
+                        <td key={`cons-${idx}`} className="px-1 py-1">
+                          {val !== "" ? (
+                            <span className="font-mono text-[13px]">{val}</span>
+                          ) : (
+                            ""
+                          )}
+                        </td>
+                      ))}
+                      <td className="px-2">=</td>
+                      <td className="px-2 text-left font-semibold">
+                        {result.consonantsResult}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -11,7 +11,7 @@ function formatForBackend(date: Date): string {
 }
 
 export default function DateCalculatorPage() {
-  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [birthDate, setBirthDate] = useState<Date | null>(new Date("1978-05-21"));
   const [referenceDate, setReferenceDate] = useState<Date | null>(new Date());
   const [result, setResult] = useState<NumerologyDatesResult | null>(null);
   const [loading, setLoading] = useState(false);
