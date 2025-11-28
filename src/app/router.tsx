@@ -12,7 +12,7 @@ import FpTestListPage from "../features/fptest/pages/FpTestListPage";
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/submissions" replace />} />
+      <Route path="/" element={<Navigate to="/results" replace />} />
 
       <Route path="/results" element={<ListPage />} />
       <Route path="/results/:submissionId" element={<DetailsPage />} />

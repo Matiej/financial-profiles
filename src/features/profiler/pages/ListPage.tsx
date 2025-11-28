@@ -128,14 +128,14 @@ export default function ListPage() {
                       <div className="flex items-center justify-between gap-2">
                         {/* Detale – po LEWEJ */}
                         <Link
-                          to={`/submissions/${encodeURIComponent(
+                          to={`/results/${encodeURIComponent(
                             row.submissionId
                           )}`}
                         >
                           <DetailButton size="sm">Detale</DetailButton>
                         </Link>
 
-                        {/* Prawa strona – dwa guziki trzymają się razem */}
+                        {/* Prawa strona*/}
                         <div className="flex items-center gap-2">
                           {/* Wybór trybu */}
                           <select
@@ -177,7 +177,7 @@ export default function ListPage() {
                           {/* Analizy */}
                           {row.isAnalyzed ? (
                             <Link
-                              to={`/submissions/${encodeURIComponent(
+                              to={`/results/${encodeURIComponent(
                                 row.submissionId
                               )}/analyses`}
                             >

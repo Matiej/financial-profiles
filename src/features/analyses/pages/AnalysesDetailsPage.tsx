@@ -6,7 +6,7 @@ import type { InsightReport, CategoryInsight } from "../../../types/profilerType
 function BackLinkButton({ submissionId }: { submissionId: string }) {
   return (
     <Link
-      to={`/submissions/${submissionId}/analyses`}
+      to={`/results/${submissionId}/analyses`}
       className="no-print group inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium
                  bg-[#0f1e3a] text-white border border-[#d4af37]/70 shadow-sm
                  hover:bg-[#0b172d] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#d4af37]"
