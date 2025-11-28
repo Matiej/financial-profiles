@@ -45,7 +45,7 @@ export default function NameCalculatorPage() {
   let letters: string[] = [];
   let vowelRow: (number | "")[] = [];
   let consonantRow: (number | "")[] = [];
-  let lettersRowNumbers: number[] = [];
+
   let lettersSum: number | null = null;
   let lettersReduced: string | null = null;
 
@@ -55,8 +55,7 @@ export default function NameCalculatorPage() {
       return isDigit(ch) || LETTER_VIBRATION[ch] !== undefined;
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    lettersRowNumbers = letters
+    letters
       .map((ch) => getNumberForChar(ch))
       .filter((n): n is number => n !== null);
 
@@ -124,9 +123,7 @@ export default function NameCalculatorPage() {
             <div className="text-sm tracking-wide text-zinc-500 mb-1">
               NAZWA
             </div>
-            <div
-              className="text-lg sm:text-2xl font-semibold tracking-[0.18em] text-[#0f1e3a] uppercase break-words max-w-full px-2"
-            >
+            <div className="text-lg sm:text-2xl font-semibold tracking-[0.18em] text-[#0f1e3a] uppercase break-words max-w-full px-2">
               {displayPhrase || "—"}
             </div>
           </div>

@@ -7,7 +7,7 @@ import { fmtDate } from "../../../lib/date";
 function BackLinkButton() {
   return (
     <Link
-      to="/submissions"
+      to="/results"
       className="no-print group inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium
                  bg-[#0f1e3a] text-white border border-[#d4af37]/70 shadow-sm
                  hover:bg-[#0b172d] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#d4af37]"

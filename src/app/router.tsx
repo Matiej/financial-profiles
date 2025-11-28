@@ -6,14 +6,13 @@ import AnalysisDetailsPage from "../features/analyses/pages/AnalysesDetailsPage"
 import StatementsDictionaryPage from "../features/dictionary/pages/StatementsDictionaryPage";
 import NameCalculatorPage from "../features/numerology-calculator/pages/NameCalculatorPage";
 import DateCalculatorPage from "../features/numerology-calculator/pages/DateCalculatorPage";
-import SubmissionDetailPage from "../features/profiler/pages/SubmissionDetailPage";
 import SubmissionListPage from "../features/profiler/pages/SubmissionListPage";
 import FpTestListPage from "../features/fptest/pages/FpTestListPage";
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/submissions" replace />} />
+      <Route path="/" element={<Navigate to="/results" replace />} />
 
       <Route path="/results" element={<ListPage />} />
       <Route path="/results/:submissionId" element={<DetailsPage />} />
@@ -23,10 +22,6 @@ export function AppRoutes() {
       />
 
       <Route path="/submissions" element={<SubmissionListPage />} />
-      <Route
-        path="/submissions/:submissionId"
-        element={<SubmissionDetailPage />}
-      />
 
       <Route
         path="/submissions/:submissionId/analyses/:index"
