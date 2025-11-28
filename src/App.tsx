@@ -156,11 +156,15 @@ function CalculatorMenu() {
 
 export default function App() {
   return (
-    <div
-      className="absolute inset-0 -z-10
-    bg-gradient-to-br from-[#ebf3e2] via-white to-[#e2ebd5]"
-    >
+    <div className="relative min-h-dvh">
+      {/* TŁO APLIKACJI */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10
+                   bg-gradient-to-br from-[#ebf3e2] via-white to-[#e2ebd5]"
+      />
+
       <RouteAwareLockRefresher />
+
       <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/75">
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex items-center justify-between gap-6 py-4">
@@ -173,7 +177,7 @@ export default function App() {
               <img
                 src="/logo.png"
                 alt="Agnieszka Kotlonek – Hipnoterapia w Biznesie"
-                className="h-14 w-auto md:h-16"
+                className="h-20 w-auto md:h-23 -my-4"
               />
             </Link>
 
@@ -181,7 +185,6 @@ export default function App() {
               <NavLockCountdown />
               <MenuLink to="/" label="Panel główny" />
               <ProfilerMenu />
-              {/* <MenuLink to="/submissions" label="Profiler" /> */}
               <MenuLink to="/dictionary" label="Słownik stwierdzeń" />
               <CalculatorMenu />
             </nav>
