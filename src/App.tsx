@@ -156,7 +156,10 @@ function CalculatorMenu() {
 
 export default function App() {
   return (
-    <div className="min-h-dvh bg-white">
+    <div
+      className="absolute inset-0 -z-10
+    bg-gradient-to-br from-[#ebf3e2] via-white to-[#e2ebd5]"
+    >
       <RouteAwareLockRefresher />
       <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/75">
         <div className="mx-auto max-w-6xl px-4">
@@ -176,6 +179,7 @@ export default function App() {
 
             <nav className="no-print flex items-center gap-3">
               <NavLockCountdown />
+              <MenuLink to="/" label="Panel główny" />
               <ProfilerMenu />
               {/* <MenuLink to="/submissions" label="Profiler" /> */}
               <MenuLink to="/dictionary" label="Słownik stwierdzeń" />

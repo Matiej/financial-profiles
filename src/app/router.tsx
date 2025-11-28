@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import ListPage from "../features/profiler/pages/ListPage";
 import DetailsPage from "../features/profiler/pages/DetailsPage";
 import AnalysesListPage from "../features/analyses/pages/AnalysesListPage";
@@ -8,11 +8,12 @@ import NameCalculatorPage from "../features/numerology-calculator/pages/NameCalc
 import DateCalculatorPage from "../features/numerology-calculator/pages/DateCalculatorPage";
 import SubmissionListPage from "../features/profiler/pages/SubmissionListPage";
 import FpTestListPage from "../features/fptest/pages/FpTestListPage";
+import DashboardHomePage from "../features/home/DashboardHomePage";
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/results" replace />} />
+      <Route path="/" element={<DashboardHomePage />} />
 
       <Route path="/results" element={<ListPage />} />
       <Route path="/results/:submissionId" element={<DetailsPage />} />
