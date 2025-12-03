@@ -9,6 +9,8 @@ import DateCalculatorPage from "../features/numerology-calculator/pages/DateCalc
 import SubmissionListPage from "../features/profiler/pages/SubmissionListPage";
 import FpTestListPage from "../features/fptest/pages/FpTestListPage";
 import DashboardHomePage from "../features/home/DashboardHomePage";
+import ScoringDetailsPage from "../features/profiler/pages/ScoringDetailsPage";
+import ScoringListPage from "../features/profiler/pages/ScoringListPage";
 
 export function AppRoutes() {
   return (
@@ -17,6 +19,13 @@ export function AppRoutes() {
 
       <Route path="/results" element={<ListPage />} />
       <Route path="/results/:submissionId" element={<DetailsPage />} />
+
+      <Route path="/scoring-results" element={<ScoringListPage />} />
+      <Route
+        path="/scoring-results/:testSubmissionPublicId"
+        element={<ScoringDetailsPage />}
+      />
+      
       <Route
         path="/results/:submissionId/analyses"
         element={<AnalysesListPage />}
