@@ -21,9 +21,18 @@ const TILES: Tile[] = [
   {
     id: "results",
     to: "/results",
-    title: "Lista wyników",
+    title: "Lista wyników (tally)",
     description:
-      "Podgląd wszystkich zakończonych testów, wysyłka do analizy AI, dostęp do raportów.",
+      "Podgląd wszystkich zakończonych testów w wersji Tally, wysyłka do analizy AI, dostęp do raportów.",
+    category: "profiler",
+    badge: "Profiler",
+  },
+  {
+    id: "results-scoring",
+    to: "/scoring-results",
+    title: "Lista wyników scoring",
+    description:
+      "Podgląd wyników nowego testu scoringowego – rozkład odpowiedzi i style w jednej przestrzeni.",
     category: "profiler",
     badge: "Profiler",
   },
@@ -81,6 +90,7 @@ type DashboardSummary = {
   resultsAnalyzed: number;
   pairsTotal: number;
   testsTotal: number;
+  scoringResultsTotal: number;
 };
 
 export default function DashboardHomePage() {
@@ -94,13 +104,19 @@ export default function DashboardHomePage() {
         setLoading(true);
         setError(null);
 
-        const [submissions, profilerList, dictionaryData, fpTests] =
-          await Promise.all([
-            apiSubmissions.list(),
-            apiProfiler.list(),
-            apiDictionary.all(),
-            apiFpTests.list(),
-          ]);
+        const [
+          submissions,
+          profilerList,
+          dictionaryData,
+          fpTests,
+          scoringList,
+        ] = await Promise.all([
+          apiSubmissions.list(),
+          apiProfiler.list(),
+          apiDictionary.all(),
+          apiFpTests.list(),
+          apiProfiler.scoringList(),
+        ]);
 
         const submissionsOpen = submissions.filter(
           (s) => s.status === "OPEN"
@@ -110,7 +126,9 @@ export default function DashboardHomePage() {
         ).length;
 
         const resultsTotal = profilerList.length;
-        const resultsAnalyzed = profilerList.filter((r) => r.isAnalyzed).length;
+        const resultsAnalyzed = profilerList.filter(
+          (r) => r.isAnalyzed
+        ).length;
 
         const pairsTotal = Object.values(dictionaryData).reduce(
           (acc, list) => acc + (list?.length ?? 0),
@@ -118,6 +136,7 @@ export default function DashboardHomePage() {
         );
 
         const testsTotal = fpTests.length;
+        const scoringResultsTotal = scoringList.length;
 
         setSummary({
           submissionsOpen,
@@ -126,6 +145,7 @@ export default function DashboardHomePage() {
           resultsAnalyzed,
           pairsTotal,
           testsTotal,
+          scoringResultsTotal,
         });
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
@@ -139,12 +159,22 @@ export default function DashboardHomePage() {
   const dictionaryTiles = TILES.filter((t) => t.category === "dictionary");
   const calculatorTiles = TILES.filter((t) => t.category === "calculator");
 
+  // Podział Profiler na dwa wiersze:
+  const profilerRow1 = profilerTiles.filter((t) =>
+    ["results", "results-scoring"].includes(t.id)
+  );
+  const profilerRow2 = profilerTiles.filter((t) =>
+    ["submissions", "tests"].includes(t.id)
+  );
+
   const getMeta = (id: string): string | null => {
     if (!summary) return null;
 
     switch (id) {
       case "results":
         return `${summary.resultsTotal} wyników, ${summary.resultsAnalyzed} z analizą AI`;
+      case "results-scoring":
+        return `${summary.scoringResultsTotal} wyników scoring`;
       case "submissions":
         return `${summary.submissionsOpen} oczekujące, ${summary.submissionsDone} zakończone`;
       case "tests":
@@ -191,8 +221,22 @@ export default function DashboardHomePage() {
               Zarządzanie testami, zgłoszeniami i analizami AI
             </span>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {profilerTiles.map((tile) => (
+
+          {/* Wiersz 1: lista wyników tally + lista wyników scoring */}
+          <div className="grid gap-4 md:grid-cols-2 mb-4">
+            {profilerRow1.map((tile) => (
+              <DashboardTile
+                key={tile.id}
+                tile={tile}
+                meta={getMeta(tile.id)}
+                loading={loading}
+              />
+            ))}
+          </div>
+
+          {/* Wiersz 2: oczekujące zgłoszenia + testy */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {profilerRow2.map((tile) => (
               <DashboardTile
                 key={tile.id}
                 tile={tile}
@@ -231,7 +275,7 @@ export default function DashboardHomePage() {
             <h2 className="text-lg font-semibold text-[#0f1e3a]">
               Kalkulatory numerologiczne
             </h2>
-            <span className="text-xs text-zinc-500">
+          <span className="text-xs text-zinc-500">
               Szybkie narzędzia do pracy indywidualnej
             </span>
           </div>
