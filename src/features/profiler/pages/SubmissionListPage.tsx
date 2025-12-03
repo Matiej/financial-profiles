@@ -4,7 +4,7 @@ import type { Submission } from "../../../types/submissionTypes";
 import { SubmissionFormModal } from "./SubmissionFormModal";
 import type { FpTest } from "../../../types/fpTestTypes";
 
-const TEST_BASE_URL = "https://prof-test/t"; // tmp
+const TEST_BASE_URL = "http://localhost:3210/t"; // tmp
 
 function formatCreatedAt(iso: string): string {
   const d = new Date(iso);
@@ -232,9 +232,9 @@ export default function SubmissionListPage() {
         )
       );
     } else {
-      // CREATE – clientId = fe_test_id
+      // CREATE – clientId = fe_client_test_id
       const created = await apiSubmissions.create({
-        clientId: "fe_test_id",
+        clientId: "fe_client_test_id",
         clientName: payload.clientName,
         clientEmail: payload.clientEmail,
         orderId: "admin_order",

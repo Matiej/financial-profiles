@@ -166,12 +166,12 @@ export function SubmissionFormModal({
                 ))}
               </select>
 
-              {/* NEW: mały podgląd opisu wybranego testu */}
               {selectedTestId && (
                 <p className="mt-1 text-xs text-zinc-500">
+                  Ilość par przekonań:{" "}
                   {
                     tests.find((t) => t.testId === selectedTestId)
-                      ?.descriptionBefore
+                      ?.fpTestStatementDtoList.length
                   }
                 </p>
               )}
