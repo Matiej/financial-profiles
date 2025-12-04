@@ -4,7 +4,8 @@ import type { Submission } from "../../../types/submissionTypes";
 import { SubmissionFormModal } from "./SubmissionFormModal";
 import type { FpTest } from "../../../types/fpTestTypes";
 
-const TEST_BASE_URL = "http://localhost:3210/t"; // tmp
+const TEST_BASE_URL =
+  import.meta.env.VITE_TEST_BASE_URL ?? "http://localhost:3210/t";
 
 function formatCreatedAt(iso: string): string {
   const d = new Date(iso);
@@ -46,12 +47,47 @@ function LinkModal({
   if (!open || !url) return null;
 
   const handleCopy = async () => {
+    // --- Próba 1: Clipboard API (działa tylko w HTTPS lub localhost) ---
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      } catch (err) {
+        console.error("Clipboard API error:", err);
+        // lecimy do fallbacku
+      }
+    }
+
+    // --- Próba 2: Fallback dla HTTP, LAN, 192.168.x.x itd. ---
     try {
-      await navigator.clipboard.writeText(url);
+      const textarea = document.createElement("textarea");
+      textarea.value = url;
+
+      // ukrycie textarea
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      textarea.style.left = "-9999px";
+      textarea.style.top = "-9999px";
+
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      const success = document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      if (!success) {
+        throw new Error("execCommand zwrócił false");
+      }
+
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      alert("Nie udało się skopiować linku.");
+    } catch (err) {
+      console.error("Fallback copy error:", err);
+      alert(
+        "Nie udało się skopiować linku. Skopiuj go ręcznie z pola powyżej."
+      );
     }
   };
 
