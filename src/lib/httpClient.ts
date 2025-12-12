@@ -1,5 +1,11 @@
 const API_BASE = import.meta.env.VITE_API_BASE ?? "/api";
 
+let authToken: string | undefined;
+
+export function setAuthToken(token?: string) {
+  authToken = token;
+}
+
 export type BackendErrorResponse = {
   timestamp: string; // Instant jako ISO
   status: number;
@@ -42,11 +48,13 @@ export async function fetchJSON<T = unknown>(
   input: string,
   init?: RequestInit
 ): Promise<T> {
+  console.log("xxxxx " + authToken)
   const res = await fetch(`${API_BASE}${input}`, {
     credentials: "include",
     ...init,
     headers: {
       Accept: "application/json",
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       ...(init?.headers || {}),
     },
   });
@@ -104,6 +112,9 @@ export async function fetchJSON<T = unknown>(
   }
 
   // === SUKCES 2xx ===
+  if (res.status === 204) {
+    return null as T;
+  }
 
   if (!text) {
     return undefined as T;
@@ -113,7 +124,7 @@ export async function fetchJSON<T = unknown>(
   if (json !== null) {
     return json as T;
   }
- 
+
   return text as unknown as T;
 }
 
