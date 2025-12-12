@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { apiAnalyses } from "../analyses/apiAnalyses";
 import type { PayloadMode, LatestStatus } from "../../types/profilerTypes";
+import { useAuth } from "../../auth/AuthProvider";
 
 type LockState = {
   locked: boolean;
@@ -37,6 +38,7 @@ export function AnalysisLockProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { authenticated, initialized } = useAuth();
   const [lock, setLock] = useState<LockState>({ locked: false });
 
   // interwał „twardy” (co 2s po kliknięciu Wyślij)
@@ -193,6 +195,11 @@ export function AnalysisLockProvider({
 
   // 🟢 global check on startup or reload
   const refreshGlobalStatus = async () => {
+    if (!initialized) return;
+    if (!authenticated) {
+      setLockedFromStatus(null, null);
+      return;
+    }
     try {
       const st = await apiAnalyses.latestGlobalStatus();
 
