@@ -2,6 +2,7 @@ import { Link, NavLink } from "react-router-dom";
 import { AppRoutes } from "./app/router";
 import { NavLockCountdown } from "./features/analyses/AnalysisLockContext";
 import RouteAwareLockRefresher from "./app/RouteAwareLockRefresher";
+import { useAuth } from "./auth/AuthProvider";
 
 function MenuLink({ to, label }: { to: string; label: string }) {
   return (
@@ -170,6 +171,14 @@ function CalculatorMenu() {
 }
 
 export default function App() {
+  const { roles } = useAuth();
+  const { authenticated, logout } = useAuth();
+  const isAdmin = roles.some((r: string) =>
+    ["BUSINESS_ADMIN", "TECH_ADMIN"].includes(r)
+  );
+
+  const isCalculatorUser = roles.includes("CALCULATOR_USER") && !isAdmin;
+
   return (
     <div className="relative min-h-dvh">
       {/* TŁO APLIKACJI */}
@@ -198,10 +207,26 @@ export default function App() {
 
             <nav className="no-print flex items-center gap-3">
               <NavLockCountdown />
-              <MenuLink to="/" label="Panel główny" />
-              <ProfilerMenu />
-              <MenuLink to="/dictionary" label="Słownik stwierdzeń" />
-              <CalculatorMenu />
+
+              {isAdmin && (
+                <>
+                  <MenuLink to="/" label="Panel główny" />
+                  <ProfilerMenu />
+                  <MenuLink to="/dictionary" label="Słownik stwierdzeń" />
+                </>
+              )}
+
+              {(isAdmin || isCalculatorUser) && <CalculatorMenu />}
+              {authenticated && (
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="inline-flex items-center rounded-md border px-4 py-2 text-[14px] font-medium
+                             bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50"
+                >
+                  Wyloguj
+                </button>
+              )}
             </nav>
           </div>
         </div>
