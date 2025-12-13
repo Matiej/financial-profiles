@@ -48,19 +48,19 @@ export function AnalysisLockProvider({
   // interwał „miękki” (co 15s, gdy jest lock — żeby odświeżać zegar/nowe joby)
   const softPollRef = useRef<number | null>(null);
 
-  const clearPolling = () => {
+  const clearPolling = useCallback(() => {
     if (pollRef.current) {
       window.clearInterval(pollRef.current);
       pollRef.current = null;
     }
-  };
+  }, []);
 
-  const clearSoftPolling = () => {
+  const clearSoftPolling = useCallback(() => {
     if (softPollRef.current) {
       window.clearInterval(softPollRef.current);
       softPollRef.current = null;
     }
-  };
+  }, []);
 
   // 🔑 Centralna logika ustawiania/odblokowania
 
@@ -133,11 +133,12 @@ export function AnalysisLockProvider({
     []
   );
 
-  const clearLock = () => {
+  //todo check this cosnt
+  const clearLock = useCallback(() => {
     clearPolling();
     clearSoftPolling();
     setLock({ locked: false });
-  };
+  }, [clearPolling, clearSoftPolling, setLock]);
 
   // ⏱️ Lokalny sekundnik – gdy remaining spada do 0 ⇒ odblokuj
   useEffect(() => {
@@ -173,7 +174,7 @@ export function AnalysisLockProvider({
         }
       }, 2000);
     },
-    [setLockedFromStatus]
+    [clearPolling, setLockedFromStatus]
   );
 
   // 🔄 miękki polling globalny co 15 s, tylko gdy lock aktywny
@@ -196,7 +197,7 @@ export function AnalysisLockProvider({
     }
 
     return () => clearSoftPolling();
-  }, [lock.locked, lock.remaining]);
+  }, [clearSoftPolling, lock.locked, lock.remaining, setLockedFromStatus]);
 
   // 🟢 global check on startup or reload
   const refreshGlobalStatus = useCallback(async () => {

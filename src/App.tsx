@@ -2,7 +2,7 @@ import { Link, NavLink } from "react-router-dom";
 import { NavLockCountdown } from "./features/analyses/AnalysisLockContext";
 import RouteAwareLockRefresher from "./app/RouteAwareLockRefresher";
 import { useAuth } from "./auth/AuthProvider";
-import { AppRoutes } from "./app/router";
+import { AppRoutes } from './app/Router';
 
 function MenuLink({ to, label }: { to: string; label: string }) {
   return (
