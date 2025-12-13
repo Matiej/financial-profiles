@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import keycloak from "../keycloak";
+import keycloak from "./keycloak";
 
 import { setAuthToken } from "../lib/httpClient";
 

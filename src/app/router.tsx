@@ -12,7 +12,7 @@ import DashboardHomePage from "../features/home/DashboardHomePage";
 import ScoringDetailsPage from "../features/profiler/pages/ScoringDetailsPage";
 import ScoringListPage from "../features/profiler/pages/ScoringListPage";
 import LoginPage from "../auth/LoginPage";
-import { ProtectedRoute } from "../ProtectedRounte";
+import { ProtectedRoute } from "../auth/ProtectedRounte";
 import LandingPage from "../features/LandingPage";
 
 export function AppRoutes() {
@@ -42,7 +42,7 @@ export function AppRoutes() {
         }
       />
 
-      <Route
+      {/* <Route
         path="/"
         element={
           <ProtectedRoute
@@ -51,7 +51,7 @@ export function AppRoutes() {
             <DashboardHomePage />
           </ProtectedRoute>
         }
-      />
+      /> */}
 
       <Route
         path="/results"

@@ -8,6 +8,8 @@ import React, {
 import { apiAnalyses } from "../analyses/apiAnalyses";
 import type { PayloadMode, LatestStatus } from "../../types/profilerTypes";
 import { useAuth } from "../../auth/AuthProvider";
+import { useCallback } from "react";
+import { useMemo } from "react";
 
 type LockState = {
   locked: boolean;
@@ -61,72 +63,75 @@ export function AnalysisLockProvider({
   };
 
   // 🔑 Centralna logika ustawiania/odblokowania
-  const setLockedFromStatus = (
-    submissionIdOrNull: string | null,
-    st: LatestStatus
-  ) => {
-    if (!st) {
-      // 204 No Content ⇒ odblokuj wszystko
-      setLock({ locked: false });
-      return;
-    }
 
-    const status = st.status;
-    const remaining = st.remainingLockSeconds ?? null;
+  const setLockedFromStatus = useCallback(
+    (submissionIdOrNull: string | null, st: LatestStatus) => {
+      if (!st) {
+        // 204 No Content ⇒ odblokuj wszystko
+        setLock({ locked: false });
+        return;
+      }
 
-    // DONE/FAILED + brak karencji lub karencja = 0 ⇒ OD-BLO-KUJ
-    if (
-      (status === "DONE" || status === "FAILED") &&
-      (remaining === null || remaining <= 0)
-    ) {
-      setLock({ locked: false });
-      return;
-    }
+      const status = st.status;
+      const remaining = st.remainingLockSeconds ?? null;
 
-    // RUNNING ⇒ lock bez licznika
-    if (status === "RUNNING") {
-      setLock({
-        locked: true,
-        mode: (st.mode ?? undefined) as PayloadMode | undefined,
-        until: null,
-        remaining: null,
-        sourceSubmissionId: submissionIdOrNull ?? st.submissionId ?? null,
-      });
-      return;
-    }
+      // DONE/FAILED + brak karencji lub karencja = 0 ⇒ OD-BLO-KUJ
+      if (
+        (status === "DONE" || status === "FAILED") &&
+        (remaining === null || remaining <= 0)
+      ) {
+        setLock({ locked: false });
+        return;
+      }
 
-    // DONE/FAILED + karencja > 0 ⇒ lock z odliczaniem
-    if (
-      (status === "DONE" || status === "FAILED") &&
-      st.isLocked &&
-      remaining !== null &&
-      remaining > 0
-    ) {
-      const until = st.expireAt ? new Date(st.expireAt) : null;
-      setLock((prev) => {
-        // jeśli backend zwróci WIĘKSZĄ karencję (np. nowy job), przyjmij większą
-        const nextRemaining =
-          prev.locked && prev.remaining != null
-            ? Math.max(prev.remaining, remaining)
-            : remaining;
-        return {
+      // RUNNING ⇒ lock bez licznika
+      if (status === "RUNNING") {
+        setLock({
           locked: true,
-          mode: (st.mode ?? prev.mode ?? undefined) as PayloadMode | undefined,
-          until,
-          remaining: nextRemaining,
-          sourceSubmissionId:
-            submissionIdOrNull ??
-            st.submissionId ??
-            prev.sourceSubmissionId ??
-            null,
-        };
-      });
-      return;
-    }
+          mode: (st.mode ?? undefined) as PayloadMode | undefined,
+          until: null,
+          remaining: null,
+          sourceSubmissionId: submissionIdOrNull ?? st.submissionId ?? null,
+        });
+        return;
+      }
 
-    // Inne statusy / brak locka ⇒ odblokuj
-    setLock({ locked: false });
-  };
+      // DONE/FAILED + karencja > 0 ⇒ lock z odliczaniem
+      if (
+        (status === "DONE" || status === "FAILED") &&
+        st.isLocked &&
+        remaining !== null &&
+        remaining > 0
+      ) {
+        const until = st.expireAt ? new Date(st.expireAt) : null;
+        setLock((prev) => {
+          // jeśli backend zwróci WIĘKSZĄ karencję (np. nowy job), przyjmij większą
+          const nextRemaining =
+            prev.locked && prev.remaining != null
+              ? Math.max(prev.remaining, remaining)
+              : remaining;
+          return {
+            locked: true,
+            mode: (st.mode ?? prev.mode ?? undefined) as
+              | PayloadMode
+              | undefined,
+            until,
+            remaining: nextRemaining,
+            sourceSubmissionId:
+              submissionIdOrNull ??
+              st.submissionId ??
+              prev.sourceSubmissionId ??
+              null,
+          };
+        });
+        return;
+      }
+
+      // Inne statusy / brak locka ⇒ odblokuj
+      setLock({ locked: false });
+    },
+    []
+  );
 
   const clearLock = () => {
     clearPolling();
@@ -152,24 +157,24 @@ export function AnalysisLockProvider({
   }, [lock.locked, lock.remaining]);
 
   // 📡 Polling po kliknięciu „Prześlij do analizy”
-  const startPolling = (
-    submissionId: string,
-    onDone: (st: LatestStatus) => void
-  ) => {
-    clearPolling();
-    pollRef.current = window.setInterval(async () => {
-      try {
-        const st = await apiAnalyses.latestStatus(submissionId);
-        setLockedFromStatus(submissionId, st);
-        if (st && (st.status === "DONE" || st.status === "FAILED")) {
-          clearPolling();
-          onDone(st);
+  const startPolling = useCallback(
+    (submissionId: string, onDone: (st: LatestStatus) => void) => {
+      clearPolling();
+      pollRef.current = window.setInterval(async () => {
+        try {
+          const st = await apiAnalyses.latestStatus(submissionId);
+          setLockedFromStatus(submissionId, st);
+          if (st && (st.status === "DONE" || st.status === "FAILED")) {
+            clearPolling();
+            onDone(st);
+          }
+        } catch {
+          // ignoruj chwilowe błędy
         }
-      } catch {
-        // ignoruj chwilowe błędy
-      }
-    }, 2000);
-  };
+      }, 2000);
+    },
+    [setLockedFromStatus]
+  );
 
   // 🔄 miękki polling globalny co 15 s, tylko gdy lock aktywny
   useEffect(() => {
@@ -194,25 +199,31 @@ export function AnalysisLockProvider({
   }, [lock.locked, lock.remaining]);
 
   // 🟢 global check on startup or reload
-  const refreshGlobalStatus = async () => {
+  const refreshGlobalStatus = useCallback(async () => {
     if (!initialized) return;
     if (!authenticated) {
       setLockedFromStatus(null, null);
       return;
     }
     try {
-      const st = await apiAnalyses.latestGlobalStatus();
+      const latestGlobalStatus = await apiAnalyses.latestGlobalStatus();
 
-      if (!st && lock.locked && lock.remaining === null) {
+      if (!latestGlobalStatus && lock.locked && lock.remaining === null) {
         return;
       }
 
-      const sid = st?.submissionId ?? null;
-      setLockedFromStatus(sid, st);
+      const sid = latestGlobalStatus?.submissionId ?? null;
+      setLockedFromStatus(sid, latestGlobalStatus);
     } catch {
       // brak statusu
     }
-  };
+  }, [
+    initialized,
+    authenticated,
+    lock.locked,
+    lock.remaining,
+    setLockedFromStatus,
+  ]);
 
   useEffect(() => {
     // pojedynczy startowy check (drugi, z cancelled — USUNIĘTY jako nadmiarowy)
@@ -225,16 +236,19 @@ export function AnalysisLockProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const contextValue = useMemo(
+    () => ({
+      lock,
+      setLockedFromStatus,
+      clearLock,
+      startPolling,
+      refreshGlobalStatus,
+    }),
+    [lock, setLockedFromStatus, clearLock, startPolling, refreshGlobalStatus]
+  );
+
   return (
-    <AnalysisLockContext.Provider
-      value={{
-        lock,
-        setLockedFromStatus,
-        clearLock,
-        startPolling,
-        refreshGlobalStatus,
-      }}
-    >
+    <AnalysisLockContext.Provider value={contextValue}>
       {children}
     </AnalysisLockContext.Provider>
   );
