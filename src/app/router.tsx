@@ -12,8 +12,9 @@ import DashboardHomePage from "../features/home/DashboardHomePage";
 import ScoringDetailsPage from "../features/profiler/pages/ScoringDetailsPage";
 import ScoringListPage from "../features/profiler/pages/ScoringListPage";
 import LoginPage from "../auth/LoginPage";
-import { ProtectedRoute } from "../ProtectedRounte";
+import { ProtectedRoute } from "../auth/ProtectedRounte";
 import LandingPage from "../features/LandingPage";
+import UsersListPage from "../features/users/pages/UsersListPage";
 
 export function AppRoutes() {
   return (
@@ -37,17 +38,6 @@ export function AppRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN"]}>
-            <DashboardHomePage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute
-            requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN", "CALCULATOR_USER"]}
-          >
             <DashboardHomePage />
           </ProtectedRoute>
         }
@@ -152,6 +142,15 @@ export function AppRoutes() {
             requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN", "CALCULATOR_USER"]}
           >
             <DateCalculatorPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN"]}>
+            <UsersListPage />
           </ProtectedRoute>
         }
       />

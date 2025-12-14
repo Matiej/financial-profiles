@@ -48,7 +48,6 @@ export async function fetchJSON<T = unknown>(
   input: string,
   init?: RequestInit
 ): Promise<T> {
-  console.log("xxxxx " + authToken)
   const res = await fetch(`${API_BASE}${input}`, {
     credentials: "include",
     ...init,

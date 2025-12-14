@@ -1,8 +1,8 @@
 import { Link, NavLink } from "react-router-dom";
-import { AppRoutes } from "./app/router";
 import { NavLockCountdown } from "./features/analyses/AnalysisLockContext";
 import RouteAwareLockRefresher from "./app/RouteAwareLockRefresher";
 import { useAuth } from "./auth/AuthProvider";
+import { AppRoutes } from "./app/Router";
 
 function MenuLink({ to, label }: { to: string; label: string }) {
   return (
@@ -213,8 +213,11 @@ export default function App() {
                   <MenuLink to="/" label="Panel główny" />
                   <ProfilerMenu />
                   <MenuLink to="/dictionary" label="Słownik stwierdzeń" />
+                  <MenuLink to="/users" label="Użytkownicy" />
                 </>
               )}
+
+              {}
 
               {(isAdmin || isCalculatorUser) && <CalculatorMenu />}
               {authenticated && (
