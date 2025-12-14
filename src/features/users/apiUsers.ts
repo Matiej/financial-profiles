@@ -14,4 +14,16 @@ export const apiUsers = {
         fetchJSON<void>(`/users/${encodeURIComponent(userId)}`, {
             method: "DELETE"
         }),
+
+    updateUser: (userId: string, payload: CreateUserPayload): Promise<UserResponse> =>
+        fetchJSON(`/users/${encodeURIComponent(userId)}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        }),
+
+    changeUserStatus: (userId: string, status: boolean): Promise<void> =>
+        fetchJSON<void>(`/users/${encodeURIComponent(userId)}/status?status=${status}`, {
+            method: "PUT",
+        }),
 }

@@ -213,7 +213,7 @@ export default function App() {
                   <MenuLink to="/" label="Panel główny" />
                   <ProfilerMenu />
                   <MenuLink to="/dictionary" label="Słownik stwierdzeń" />
-                  <MenuLink to="/users" label="Zarządzanie użytkownikami" />
+                  <MenuLink to="/users" label="Użytkownicy" />
                 </>
               )}
 

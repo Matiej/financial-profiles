@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiUsers } from "../apiUsers";
-import type { UserResponse } from "../../../types/userTypes";
+import type { CreateUserPayload, UserResponse } from "../../../types/userTypes";
+import { UserFormModal } from "./UserFormModal";
 
 function fmtDate(iso?: string | null) {
   if (!iso) return "—";
@@ -12,6 +13,49 @@ export default function UsersListPage() {
   const [data, setData] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<UserResponse | null>(null);
+
+  const refreshList = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const list = await apiUsers.listUsers();
+      setData(list);
+    } catch (e: unknown) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Nie udało się pobrać listy użytkowników."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshList();
+  }, []);
+
+  const handleNew = () => {
+    setEditTarget(null);
+    setModalOpen(true);
+  };
+
+  const handleEdit = (u: UserResponse) => {
+    setEditTarget(u);
+    setModalOpen(true);
+  };
+
+  const handleSubmitModal = async (payload: CreateUserPayload) => {
+    if (editTarget) {
+      await apiUsers.updateUser(editTarget.id, payload);
+    } else {
+      await apiUsers.createUser(payload);
+    }
+    await refreshList(); // zgodnie z Twoją decyzją: zawsze dociągamy listę
+  };
 
   useEffect(() => {
     (async () => {
@@ -45,15 +89,14 @@ export default function UsersListPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div>
       <div className="flex items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-[#0f1e3a]">Użytkownicy</h1>
 
         <button
-          type="button"
+          onClick={handleNew}
           className="inline-flex items-center rounded-md bg-[#0f1e3a] text-white px-4 py-2 text-sm font-medium
                      hover:bg-[#0b172d] border border-[#d4af37]/60 shadow-sm"
-          onClick={() => alert("Następny krok: modal tworzenia użytkownika 🙂")}
         >
           + Nowy użytkownik
         </button>
@@ -107,10 +150,9 @@ export default function UsersListPage() {
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        type="button"
+                        onClick={() => handleEdit(user)}
                         className="inline-flex items-center rounded-md border border-neutral-300 bg-white text-neutral-700
-                                   px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 shadow-sm"
-                        onClick={() => alert("Następny krok: modal edycji")}
+                               px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 shadow-sm"
                       >
                         Edytuj
                       </button>
@@ -141,6 +183,13 @@ export default function UsersListPage() {
           </table>
         </div>
       )}
+
+      <UserFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleSubmitModal}
+        initial={editTarget}
+      />
     </div>
   );
 }
