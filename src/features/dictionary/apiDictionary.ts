@@ -15,7 +15,6 @@ export const CATEGORY_PL: Record<StatementCategory, string> = {
 
 export const ALL_CATEGORIES = Object.keys(CATEGORY_PL) as StatementCategory[];
 
-// base api prefix statys in httpClient.ts → "/api"
 export const apiDictionary = {
   byCategory: (category: StatementCategory): Promise<StatementDefinitionDto[]> =>
     fetchJSON(`/definition/category?category=${encodeURIComponent(category)}`),
