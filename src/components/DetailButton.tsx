@@ -5,21 +5,27 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   size?: "sm" | "md";
 };
 
-export default function Button({ variant = "primary", size = "md", className = "", ...rest }: Props) {
+export default function Button({
+  variant = "primary",
+  size = "md",
+  className = "",
+  ...rest
+}: Props) {
   const base =
-    "inline-flex items-center justify-center rounded-md font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "inline-flex items-center justify-center rounded-md font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-mist";
   const sizes = {
     sm: "text-sm px-3 py-1.5",
     md: "text-sm px-4 py-2",
   }[size];
-
-  // Brand: granat + złoto
+ 
   const variants = {
     primary:
-      "bg-[#0f1e3a] text-white ring-[#d4af37] hover:bg-[#0b172d] shadow-sm border border-[#d4af37]/70",
+      "bg-brand-ink text-white hover:bg-brand-berry shadow-sm border border-brand-mist/70",
     secondary:
-      "bg-white text-[#0f1e3a] ring-[#d4af37] hover:bg-zinc-50 border border-[#d4af37]/60",
+      "bg-white text-brand-ink hover:bg-brand-cloud border border-brand-mist/70",
   }[variant];
 
-  return <button className={`${base} ${sizes} ${variants} ${className}`} {...rest} />;
+  return (
+    <button className={`${base} ${sizes} ${variants} ${className}`} {...rest} />
+  );
 }

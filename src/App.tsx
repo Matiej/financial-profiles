@@ -1,20 +1,36 @@
-import { Link, NavLink } from "react-router-dom";
-import { NavLockCountdown } from "./features/analyses/AnalysisLockContext";
-import RouteAwareLockRefresher from "./app/RouteAwareLockRefresher";
-import { useAuth } from "./auth/AuthProvider";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { AppRoutes } from "./app/router";
+import { useAuth } from "./auth/AuthProvider";
+import RouteAwareLockRefresher from "./app/RouteAwareLockRefresher";
 
-function MenuLink({ to, label }: { to: string; label: string }) {
+function Brand() {
+  return (
+    <Link to="/" className="flex items-center gap-3">
+      <img src="/logo.png" alt="Finance Profiler" className="h-10 w-auto" />
+      <div className="leading-tight">
+        <div className="text-sm font-semibold text-brand-ink">Finance Profiler</div>
+        <div className="text-xs text-brand-ink/70">Panel</div>
+      </div>
+    </Link>
+  );
+}
+
+function TopNavLink({
+  to,
+  label,
+}: {
+  to: string;
+  label: string;
+}) {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
         [
-          "inline-flex items-center rounded-md border transition-colors",
-          "px-5 py-2.5 text-[15px] font-medium",
+          "px-3 py-2 rounded-md text-sm font-medium transition",
           isActive
-            ? "bg-[#0f1e3a] text-white border-[#0f1e3a]"
-            : "bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50",
+            ? "bg-brand-ink text-white"
+            : "text-brand-ink hover:bg-brand-cloud",
         ].join(" ")
       }
     >
@@ -24,86 +40,44 @@ function MenuLink({ to, label }: { to: string; label: string }) {
 }
 
 function ProfilerMenu() {
+  const itemClass = (isActive: boolean) =>
+    [
+      "block px-4 py-2",
+      isActive ? "bg-brand-ink text-white" : "text-brand-ink hover:bg-brand-cloud",
+    ].join(" ");
+
   return (
     <div className="relative group">
       <button
-        className="inline-flex items-center rounded-md border transition-colors
-                   px-5 py-2.5 text-[15px] font-medium
-                   bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50"
+        className="px-3 py-2 rounded-md text-sm font-medium text-brand-ink hover:bg-brand-cloud transition inline-flex items-center gap-2"
         type="button"
       >
         Profiler
         <svg
-          className="ml-2 h-4 w-4"
-          viewBox="0 0 20 20"
+          className="h-4 w-4 opacity-70"
+          viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
+          strokeWidth="2"
         >
-          <path d="M6 8l4 4 4-4" />
+          <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
 
       <div
-        className="absolute right-0 mt-1 w-56 rounded-md border border-zinc-200 bg-white shadow-lg
+        className="absolute left-0 mt-1 w-56 rounded-md border border-brand-mist/70 bg-white shadow-lg
                    py-1 text-sm z-50 hidden group-hover:block"
       >
-        <NavLink
-          to="/results"
-          className={({ isActive }) =>
-            [
-              "block px-4 py-2",
-              isActive
-                ? "bg-[#0f1e3a] text-white"
-                : "text-[#0f1e3a] hover:bg-neutral-50",
-            ].join(" ")
-          }
-        >
+        <NavLink to="/results" className={({ isActive }) => itemClass(isActive)}>
           Lista wyników (tally)
         </NavLink>
-
-        <NavLink
-          to="/scoring-results"
-          className={({ isActive }) =>
-            [
-              "block px-4 py-2",
-              isActive
-                ? "bg-[#0f1e3a] text-white"
-                : "text-[#0f1e3a] hover:bg-neutral-50",
-            ].join(" ")
-          }
-        >
+        <NavLink to="/scoring-results" className={({ isActive }) => itemClass(isActive)}>
           Wyniki scoring
         </NavLink>
-
-        <NavLink
-          to="/submissions"
-          className={({ isActive }) =>
-            [
-              "block px-4 py-2",
-              isActive
-                ? "bg-[#0f1e3a] text-white"
-                : "text-[#0f1e3a] hover:bg-neutral-50",
-            ].join(" ")
-          }
-        >
+        <NavLink to="/submissions" className={({ isActive }) => itemClass(isActive)}>
           Oczekujące zgłoszenia
         </NavLink>
-
-        <NavLink
-          to="/tests"
-          className={({ isActive }) =>
-            [
-              "block px-4 py-2",
-              isActive
-                ? "bg-[#0f1e3a] text-white"
-                : "text-[#0f1e3a] hover:bg-neutral-50",
-            ].join(" ")
-          }
-        >
+        <NavLink to="/tests" className={({ isActive }) => itemClass(isActive)}>
           Testy
         </NavLink>
       </div>
@@ -112,57 +86,38 @@ function ProfilerMenu() {
 }
 
 function CalculatorMenu() {
+  const itemClass = (isActive: boolean) =>
+    [
+      "block px-4 py-2",
+      isActive ? "bg-brand-ink text-white" : "text-brand-ink hover:bg-brand-cloud",
+    ].join(" ");
+
   return (
     <div className="relative group">
       <button
-        className="inline-flex items-center rounded-md border transition-colors
-                   px-5 py-2.5 text-[15px] font-medium
-                   bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50"
+        className="px-3 py-2 rounded-md text-sm font-medium text-brand-ink hover:bg-brand-cloud transition inline-flex items-center gap-2"
         type="button"
       >
         Kalkulatory
         <svg
-          className="ml-2 h-4 w-4"
-          viewBox="0 0 20 20"
+          className="h-4 w-4 opacity-70"
+          viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
+          strokeWidth="2"
         >
-          <path d="M6 8l4 4 4-4" />
+          <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
 
       <div
-        className="absolute right-0 mt-1 w-48 rounded-md border border-zinc-200 bg-white shadow-lg
+        className="absolute left-0 mt-1 w-48 rounded-md border border-brand-mist/70 bg-white shadow-lg
                    py-1 text-sm z-50 hidden group-hover:block"
       >
-        <NavLink
-          to="/calculators/names"
-          className={({ isActive }) =>
-            [
-              "block px-4 py-2",
-              isActive
-                ? "bg-[#0f1e3a] text-white"
-                : "text-[#0f1e3a] hover:bg-neutral-50",
-            ].join(" ")
-          }
-        >
-          Nazwy
+        <NavLink to="/calculators/names" className={({ isActive }) => itemClass(isActive)}>
+          Imiona
         </NavLink>
-        <NavLink
-          to="/calculators/dates"
-          className={({ isActive }) =>
-            [
-              "block px-4 py-2",
-              isActive
-                ? "bg-[#0f1e3a] text-white"
-                : "text-[#0f1e3a] hover:bg-neutral-50",
-            ].join(" ")
-          }
-        >
+        <NavLink to="/calculators/dates" className={({ isActive }) => itemClass(isActive)}>
           Daty
         </NavLink>
       </div>
@@ -171,71 +126,57 @@ function CalculatorMenu() {
 }
 
 export default function App() {
-  const { roles } = useAuth();
-  const { authenticated, logout } = useAuth();
-  const isAdmin = roles.some((r: string) =>
-    ["BUSINESS_ADMIN", "TECH_ADMIN"].includes(r)
-  );
+  const { initialized, authenticated, roles, logout } = useAuth();
+  const location = useLocation();
+  const isLoginRoute = location.pathname === "/login";
 
-  const isCalculatorUser = roles.includes("CALCULATOR_USER") && !isAdmin;
+  const isAdmin = (roles ?? []).includes("BUSINESS_ADMIN") || (roles ?? []).includes("TECH_ADMIN");
+  const isCalculatorUser = (roles ?? []).includes("CALCULATOR_USER");
 
   return (
     <div className="relative min-h-dvh">
-      {/* TŁO APLIKACJI */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10
-                   bg-gradient-to-br from-[#ebf3e2] via-white to-[#e2ebd5]"
-      />
+      {/* Tło */}
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-brand-cloud" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-brand-cloud via-white to-brand-mist/40" />
 
+      {/* (opcjonalne) odświeżanie locków */}
       <RouteAwareLockRefresher />
 
-      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/75">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="flex items-center justify-between gap-6 py-4">
-            <Link
-              to="https://agnieszkakotlonek.pl/"
-              className="block"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="/logo.png"
-                alt="Agnieszka Kotlonek – Hipnoterapia w Biznesie"
-                className="h-20 w-auto md:h-23 -my-4"
-              />
-            </Link>
+      {/* Header tylko poza /login */}
+      {!isLoginRoute && (
+        <header className="sticky top-0 z-40 border-b border-brand-mist/70 bg-white/85 backdrop-blur">
+          <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
+            <Brand />
 
-            <nav className="no-print flex items-center gap-3">
-              <NavLockCountdown />
-
-              {isAdmin && (
+            <nav className="flex items-center gap-2">
+              {/* pokazuj menu dopiero jak auth zainicjalizowany (żeby nie mrugało) */}
+              {initialized && authenticated && (
                 <>
-                  <MenuLink to="/" label="Panel główny" />
-                  <ProfilerMenu />
-                  <MenuLink to="/dictionary" label="Słownik stwierdzeń" />
-                  <MenuLink to="/users" label="Użytkownicy" />
+                  {isAdmin && <TopNavLink to="/dashboard" label="Dashboard" />}
+                  {isAdmin && <ProfilerMenu />}
+                  {(isAdmin || isCalculatorUser) && <CalculatorMenu />}
+                  {isAdmin && <TopNavLink to="/dictionary" label="Słownik" />}
+                  {isAdmin && <TopNavLink to="/users" label="Użytkownicy" />}
                 </>
               )}
+            </nav>
 
-              {}
-
-              {(isAdmin || isCalculatorUser) && <CalculatorMenu />}
-              {authenticated && (
+            <div className="flex items-center gap-2">
+              {initialized && authenticated ? (
                 <button
-                  type="button"
                   onClick={logout}
-                  className="inline-flex items-center rounded-md border px-4 py-2 text-[14px] font-medium
-                             bg-white text-[#0f1e3a] border-[#d4af37]/60 hover:bg-neutral-50"
+                  className="rounded-md border border-brand-mist/70 bg-white px-3 py-2 text-sm font-medium
+                             text-brand-ink hover:bg-brand-cloud transition shadow-sm"
                 >
                   Wyloguj
                 </button>
-              )}
-            </nav>
+              ) : null}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className={isLoginRoute ? "px-4 py-10" : "mx-auto max-w-6xl px-4 py-6"}>
         <AppRoutes />
       </main>
     </div>
