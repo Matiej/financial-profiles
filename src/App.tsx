@@ -9,8 +9,8 @@ function Brand() {
     <Link to="/" className="flex items-center gap-3">
       <img src="/logo.png" alt="Finance Profiler" className="h-10 w-auto" />
       <div className="leading-tight">
-        <div className="text-sm font-semibold text-brand-ink">Finance Profiler</div>
-        <div className="text-xs text-brand-ink/70">Panel</div>
+        <div className="text-sm font-semibold text-zinc-900">Finance Profiler</div>
+        <div className="text-xs text-zinc-600">Panel</div>
       </div>
     </Link>
   );
@@ -28,10 +28,10 @@ function TopNavLink({
       to={to}
       className={({ isActive }) =>
         [
-          "px-3 py-2 rounded-md text-sm font-medium transition",
+          "px-3 py-2 rounded-md text-sm font-medium transition border shadow-sm",
           isActive
-            ? "bg-brand-ink text-white"
-            : "text-brand-ink hover:bg-brand-cloud",
+            ? "bg-brand-ink text-white border-brand-mist/70"
+            : "bg-brand-cloud text-black border-brand-mist/70 hover:bg-brand-mist/40",
         ].join(" ")
       }
     >
@@ -44,12 +44,12 @@ function ProfilerMenu() {
   const itemClass = (isActive: boolean) =>
     [
       "block px-4 py-2",
-      isActive ? "bg-brand-ink text-white" : "text-brand-ink hover:bg-brand-cloud",
+      isActive ? "bg-brand-ink text-white" : "text-black hover:bg-zinc-100",
     ].join(" ");
 
   return (
     <div className="relative group">
-      <Button variant="ghost" type="button" className="gap-2">
+      <Button variant="nav" type="button" className="gap-2">
         Profiler
         <svg
           className="h-4 w-4 opacity-70"
@@ -87,12 +87,12 @@ function CalculatorMenu() {
   const itemClass = (isActive: boolean) =>
     [
       "block px-4 py-2",
-      isActive ? "bg-brand-ink text-white" : "text-brand-ink hover:bg-brand-cloud",
+      isActive ? "bg-brand-ink text-white" : "text-black hover:bg-zinc-100",
     ].join(" ");
 
   return (
     <div className="relative group">
-      <Button variant="ghost" type="button" className="gap-2">
+      <Button variant="nav" type="button" className="gap-2">
         Kalkulatory
         <svg
           className="h-4 w-4 opacity-70"
