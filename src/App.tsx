@@ -2,6 +2,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { AppRoutes } from "./app/router";
 import { useAuth } from "./auth/AuthProvider";
 import RouteAwareLockRefresher from "./app/RouteAwareLockRefresher";
+import Button from "./ui/Button";
 
 function Brand() {
   return (
@@ -48,10 +49,7 @@ function ProfilerMenu() {
 
   return (
     <div className="relative group">
-      <button
-        className="px-3 py-2 rounded-md text-sm font-medium text-brand-ink hover:bg-brand-cloud transition inline-flex items-center gap-2"
-        type="button"
-      >
+      <Button variant="ghost" type="button" className="gap-2">
         Profiler
         <svg
           className="h-4 w-4 opacity-70"
@@ -62,7 +60,7 @@ function ProfilerMenu() {
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
-      </button>
+      </Button>
 
       <div
         className="absolute left-0 mt-1 w-56 rounded-md border border-brand-mist/70 bg-white shadow-lg
@@ -94,10 +92,7 @@ function CalculatorMenu() {
 
   return (
     <div className="relative group">
-      <button
-        className="px-3 py-2 rounded-md text-sm font-medium text-brand-ink hover:bg-brand-cloud transition inline-flex items-center gap-2"
-        type="button"
-      >
+      <Button variant="ghost" type="button" className="gap-2">
         Kalkulatory
         <svg
           className="h-4 w-4 opacity-70"
@@ -108,7 +103,7 @@ function CalculatorMenu() {
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
-      </button>
+      </Button>
 
       <div
         className="absolute left-0 mt-1 w-48 rounded-md border border-brand-mist/70 bg-white shadow-lg
@@ -163,13 +158,9 @@ export default function App() {
 
             <div className="flex items-center gap-2">
               {initialized && authenticated ? (
-                <button
-                  onClick={logout}
-                  className="rounded-md border border-brand-mist/70 bg-white px-3 py-2 text-sm font-medium
-                             text-brand-ink hover:bg-brand-cloud transition shadow-sm"
-                >
+                <Button onClick={logout} variant="secondary">
                   Wyloguj
-                </button>
+                </Button>
               ) : null}
             </div>
           </div>

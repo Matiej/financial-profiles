@@ -1,4 +1,4 @@
-import Button from "./DetailButton";
+import Button from "../ui/Button";
 
 type Props = {
   open: boolean;

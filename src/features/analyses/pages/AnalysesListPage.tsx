@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { apiAnalyses } from "../apiAnalyses";
 import { apiProfiler } from "../../profiler/apiProfiler"; // <-- dodany import do meta
 import type { InsightReport } from "../../../types/profilerTypes";
-import Button from "../../../components/DetailButton";
+import Button from "../../../ui/Button";
 
 const MODE_PL: Record<string, string> = {
   MINIMAL: "Minimalny",

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Submission } from "../../../types/submissionTypes";
 import type { FpTest } from "../../../types/fpTestTypes";
 import { apiSubmissions } from "../apiSubmissions";
+import Button from "../../../ui/Button";
 
 type Props = {
   open: boolean;
@@ -204,23 +205,21 @@ export function SubmissionFormModal({
           </div>
 
           <div className="mt-6 flex justify-end gap-3">
-            <button
+            <Button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="inline-flex items-center rounded-md border border-neutral-300 bg-white text-neutral-700
-                         px-4 py-2 text-sm font-medium hover:bg-neutral-50 shadow-sm"
+              variant="secondary"
             >
               Anuluj
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center rounded-md bg-[#0f1e3a] text-white px-4 py-2 text-sm font-medium
-                         hover:bg-[#0b172d] border border-[#d4af37]/60 shadow-sm disabled:opacity-70"
+              variant="primary"
             >
               {saving ? "Zapisywanie…" : isEdit ? "Zapisz zmiany" : "Utwórz"}
-            </button>
+            </Button>
           </div>
 
           {/* X w rogu */}

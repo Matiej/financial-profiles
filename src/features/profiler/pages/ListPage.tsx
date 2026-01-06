@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiProfiler } from "../apiProfiler";
-import DetailButton from "../../../components/DetailButton";
 import type {
   SubmissionListItem,
   PayloadMode,
@@ -9,6 +8,7 @@ import type {
 import { useAnalysisLock } from "../../../features/analyses/AnalysisLockContext";
 import { apiAnalyses } from "../../../features/analyses/apiAnalyses";
 import AnalysisDoneModal from "../../../components/AnalysisDoneModal";
+import Button from "../../../ui/Button";
 
 export default function ListPage() {
   const navigate = useNavigate();
@@ -132,7 +132,7 @@ export default function ListPage() {
                             row.submissionId
                           )}`}
                         >
-                          <DetailButton size="sm">Detale</DetailButton>
+                          <Button variant="outline" size="sm">Detale</Button>
                         </Link>
 
                         {/* Prawa strona*/}
@@ -156,15 +156,11 @@ export default function ListPage() {
                           </select>
 
                           {/* Prześlij do analizy */}
-                          <button
+                          <Button
                             onClick={() => sendToAnalysis(row.submissionId)}
                             disabled={disabled}
-                            className={[
-                              "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium shadow-sm border",
-                              disabled
-                                ? "cursor-not-allowed opacity-70 border-neutral-300 bg-neutral-100 text-neutral-400"
-                                : "border-[#0f1e3a] bg-white text-[#0f1e3a] hover:bg-neutral-50",
-                            ].join(" ")}
+                            variant="outline"
+                            size="sm"
                             title={
                               lock.locked
                                 ? "Analiza zablokowana – poczekaj na zakończenie/karencję"
@@ -172,7 +168,7 @@ export default function ListPage() {
                             }
                           >
                             Prześlij do analizy
-                          </button>
+                          </Button>
 
                           {/* Analizy */}
                           {row.isAnalyzed ? (
@@ -181,23 +177,20 @@ export default function ListPage() {
                                 row.submissionId
                               )}/analyses`}
                             >
-                              <button
-                                className="inline-flex items-center rounded-md border border-[#0f1e3a] bg-white text-[#0f1e3a]
-                                           px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 shadow-sm"
-                              >
+                              <Button variant="outline" size="sm">
                                 Analizy
-                              </button>
+                              </Button>
                             </Link>
                           ) : (
-                            <button
+                            <Button
                               disabled
                               aria-disabled="true"
                               title="Analizy będą dostępne po przetworzeniu"
-                              className="inline-flex items-center rounded-md border border-neutral-300 bg-neutral-100 text-neutral-400
-                                         px-3 py-1.5 text-sm font-medium cursor-not-allowed opacity-70"
+                              variant="outline"
+                              size="sm"
                             >
                               Analizy
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </div>

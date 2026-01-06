@@ -5,7 +5,7 @@ import type {
   InsightReport,
   CategoryInsight,
 } from "../../../types/profilerTypes";
-import Button from "../../../components/DetailButton";
+import Button from "../../../ui/Button";
 
 function BackLinkButton({ submissionId }: { submissionId: string }) {
   return (

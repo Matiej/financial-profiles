@@ -7,37 +7,35 @@ import type {
   ScoreBucketKey,
 } from "../../../types/profilerTypes";
 import { fmtDate } from "../../../lib/date";
+import Button from "../../../ui/Button";
 
 function BackLinkButton() {
   return (
-    <Link
-      to="/scoring-results"
-      className="no-print group inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium
-                 bg-[#0f1e3a] text-white border border-[#d4af37]/70 shadow-sm
-                 hover:bg-[#0b172d] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#d4af37]"
-    >
-      <svg
-        className="h-4 w-4 -ml-1 transition-transform group-hover:-translate-x-1"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M15 18l-6-6 6-6" />
-      </svg>
-      <span>Powrót do listy scoringów</span>
+    <Link to="/scoring-results" className="no-print">
+      <Button variant="primary" className="gap-2 group">
+        <svg
+          className="h-4 w-4 -ml-1 transition-transform group-hover:-translate-x-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        <span>Powrót do listy scoringów</span>
+      </Button>
     </Link>
   );
 }
 
 function PrintButton() {
   return (
-    <button
+    <Button
       onClick={() => window.print()}
-      className="no-print inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium
-                 border border-neutral-300 shadow-sm hover:bg-neutral-50"
+      variant="secondary"
+      className="no-print gap-2"
       title="Drukuj"
     >
       <svg
@@ -56,7 +54,7 @@ function PrintButton() {
         <path d="M6 14h12v8H6z" />
       </svg>
       Drukuj
-    </button>
+    </Button>
   );
 }
 

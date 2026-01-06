@@ -5,6 +5,7 @@ import { FpTestFormModal } from "./FpTestFormModal";
 import { TestIdModal } from "./TestIdModal";
 import { ApiError } from "../../../lib/httpClient";
 import React from "react";
+import Button from "../../../ui/Button";
 
 function formatCreatedAt(iso: string | null): string {
   if (!iso) return "—";
@@ -178,13 +179,9 @@ export default function FpTestListPage() {
         <h1 className="text-2xl font-semibold text-[#0f1e3a]">
           Testy finansowego profilu
         </h1>
-        <button
-          onClick={handleNew}
-          className="inline-flex items-center rounded-md bg-[#0f1e3a] text-white px-4 py-2 text-sm font-medium
-                     hover:bg-[#0b172d] border border-[#d4af37]/60 shadow-sm"
-        >
+        <Button onClick={handleNew} variant="primary">
           + Nowy test
-        </button>
+        </Button>
       </div>
 
       {data.length === 0 ? (
@@ -262,37 +259,33 @@ export default function FpTestListPage() {
 
                       <td className="px-3 py-2">
                         <div className="flex items-center justify-end gap-2">
-                          <button
+                          <Button
                             type="button"
                             onClick={() => openTestIdModal(test.testId)}
-                            className="inline-flex items-center rounded-md border border-[#0f1e3a] bg-white text-[#0f1e3a]
-                 px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 shadow-sm"
+                            variant="outline"
+                            size="sm"
                           >
                             ID testu
-                          </button>
+                          </Button>
 
-                          <button
+                          <Button
                             onClick={() => handleEdit(test)}
-                            className="inline-flex items-center rounded-md border border-neutral-300 bg-white text-neutral-700
-                 px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 shadow-sm"
+                            variant="outline"
+                            size="sm"
                           >
                             Edytuj
-                          </button>
+                          </Button>
 
-                          <button
+                          <Button
                             onClick={() => {
                               if (!isUsed) handleDelete(test);
                             }}
                             disabled={isUsed}
-                            className={
-                              "inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm " +
-                              (isUsed
-                                ? "border-red-100 bg-red-50 text-red-300 cursor-not-allowed"
-                                : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100")
-                            }
+                            variant="danger"
+                            size="sm"
                           >
                             Usuń
-                          </button>
+                          </Button>
 
                           {/* stałe miejsce na "?" */}
                           <span

@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
-import Button from "../components/DetailButton";
+import Button from "../ui/Button";
 
 export default function LoginPage() {
   const { initialized, authenticated, login } = useAuth();

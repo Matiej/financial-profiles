@@ -3,6 +3,7 @@ import { apiSubmissions } from "../apiSubmissions";
 import type { Submission } from "../../../types/submissionTypes";
 import { SubmissionFormModal } from "./SubmissionFormModal";
 import type { FpTest } from "../../../types/fpTestTypes";
+import Button from "../../../ui/Button";
 
 const TEST_BASE_URL =
   import.meta.env.VITE_TEST_BASE_URL ?? "http://localhost:3210/t";
@@ -117,22 +118,20 @@ function LinkModal({
           </div>
 
           <div className="mt-4 flex justify-end gap-3">
-            <button
+            <Button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center rounded-md border border-zinc-300 bg-white text-zinc-800
-                         px-4 py-2 text-sm font-medium hover:bg-neutral-50 shadow-sm"
+              variant="secondary"
             >
               {copied ? "Skopiowano!" : "Skopiuj"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center rounded-md bg-[#0f1e3a] text-white px-4 py-2 text-sm font-medium
-                         hover:bg-[#0b172d] border border-[#d4af37]/60 shadow-sm"
+              variant="primary"
             >
               OK
-            </button>
+            </Button>
           </div>
 
           {/* X w rogu */}
@@ -308,13 +307,9 @@ export default function SubmissionListPage() {
         <h1 className="text-2xl font-semibold text-[#0f1e3a]">
           Oczekujące zgłoszenia
         </h1>
-        <button
-          onClick={handleNew}
-          className="inline-flex items-center rounded-md bg-[#0f1e3a] text-white px-4 py-2 text-sm font-medium
-                     hover:bg-[#0b172d] border border-[#d4af37]/60 shadow-sm"
-        >
+        <Button onClick={handleNew} variant="primary">
           + Nowe zgłoszenie
-        </button>
+        </Button>
       </div>
 
       {data.length === 0 ? (
@@ -375,47 +370,40 @@ export default function SubmissionListPage() {
                     </td>
                     <td className="px-3 py-2">
                       <div className="flex items-center justify-end gap-2">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => openLinkModal(row.publicToken)}
-                          className="inline-flex items-center rounded-md border border-[#0f1e3a] bg-white text-[#0f1e3a]
-                                     px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 shadow-sm"
+                          variant="outline"
+                          size="sm"
                         >
                           Link do testu
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                           onClick={
                             row.status === "DONE"
                               ? undefined
                               : () => handleEdit(row)
                           }
                           disabled={row.status === "DONE"}
-                          className={`inline-flex items-center rounded-md border border-neutral-300 bg-white text-neutral-700
-                                      px-3 py-1.5 text-xs font-medium shadow-sm ${
-                                        row.status === "DONE"
-                                          ? "opacity-50 cursor-not-allowed"
-                                          : "hover:bg-neutral-50"
-                                      }`}
+                          variant="outline"
+                          size="sm"
                         >
                           Edytuj
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                           onClick={
                             row.status === "DONE"
                               ? undefined
                               : () => handleDelete(row)
                           }
                           disabled={row.status === "DONE"}
-                          className={`inline-flex items-center rounded-md border border-red-200 bg-red-50 text-red-700 px-3 py-1.5 text-xs font-medium shadow-sm ${
-                            row.status === "DONE"
-                              ? "opacity-50 cursor-not-allowed"
-                              : "hover:bg-red-100"
-                          }`}
+                          variant="danger"
+                          size="sm"
                         >
                           Usuń
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiProfiler } from "../apiProfiler";
 import type { ScoringProfiledShort } from "../../../types/profilerTypes";
+import Button from "../../../ui/Button";
 
 export default function ScoringListPage() {
   const [data, setData] = useState<ScoringProfiledShort[]>([]);
@@ -111,10 +112,10 @@ export default function ScoringListPage() {
                       to={`/scoring-results/${encodeURIComponent(
                         row.testSubmissionPublicId
                       )}`}
-                      className="inline-flex items-center rounded-md border border-[#0f1e3a] bg-white text-[#0f1e3a]
-                     px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 shadow-sm"
                     >
-                      Detale
+                      <Button variant="outline" size="sm">
+                        Detale
+                      </Button>
                     </Link>
                   </td>
                 </tr>
