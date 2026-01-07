@@ -50,18 +50,18 @@ export default function Button({
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand-ink text-white border border-brand-mist/70 shadow-sm " +
-    "hover:bg-brand-berry " +
+    "bg-brand-berry text-white border border-brand-mist/60 shadow-md " +
+    "hover:bg-brand-ink " +
     "disabled:opacity-60 disabled:cursor-not-allowed",
 
   secondary:
-    "bg-zinc-100/80 text-zinc-900 border border-zinc-300 shadow-sm " +
-    "hover:bg-zinc-200/80 " +
+    "bg-slate-100 text-slate-900 border border-slate-200 shadow-sm " +
+    "hover:bg-slate-200 " +
     "disabled:opacity-60 disabled:cursor-not-allowed",
 
   outline:
-    "bg-white text-zinc-900 border border-zinc-300 shadow-sm " +
-    "hover:bg-zinc-100 " +
+    "bg-slate-100 text-slate-900 border border-slate-200 shadow-sm " +
+    "hover:bg-slate-200 " +
     "disabled:opacity-60 disabled:cursor-not-allowed",
 
   danger:
@@ -70,13 +70,13 @@ const variants: Record<ButtonVariant, string> = {
     "disabled:opacity-60 disabled:cursor-not-allowed",
 
   ghost:
-    "text-zinc-900 " +
-    "hover:bg-zinc-100/70 " +
+    "bg-slate-100 text-slate-900 border border-slate-200 shadow-sm " +
+    "hover:bg-slate-200 " +
     "disabled:opacity-60 disabled:cursor-not-allowed",
 
   nav:
-    "bg-brand-cloud text-black border border-brand-mist/70 shadow-sm " +
-    "hover:bg-brand-mist/40 " +
+    "bg-slate-100 text-slate-900 border border-slate-200 shadow-sm " +
+    "hover:bg-slate-200 " +
     "disabled:opacity-60 disabled:cursor-not-allowed",
 };
 

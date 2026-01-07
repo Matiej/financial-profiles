@@ -9,8 +9,8 @@ function Brand() {
     <Link to="/" className="flex items-center gap-3">
       <img src="/logo.png" alt="Finance Profiler" className="h-10 w-auto" />
       <div className="leading-tight">
-        <div className="text-sm font-semibold text-zinc-900">Finance Profiler</div>
-        <div className="text-xs text-zinc-600">Panel</div>
+        <div className="text-sm font-semibold text-slate-900">Finance Profiler</div>
+        <div className="text-xs text-slate-600">Panel</div>
       </div>
     </Link>
   );
@@ -24,18 +24,15 @@ function TopNavLink({
   label: string;
 }) {
   return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        [
-          "px-3 py-2 rounded-md text-sm font-medium transition border shadow-sm",
-          isActive
-            ? "bg-brand-ink text-white border-brand-mist/70"
-            : "bg-brand-cloud text-black border-brand-mist/70 hover:bg-brand-mist/40",
-        ].join(" ")
-      }
-    >
-      {label}
+    <NavLink to={to}>
+      {({ isActive }) => (
+        <Button
+          variant={isActive ? "primary" : "secondary"}
+          className={`min-w-[140px] ${isActive ? "!bg-brand-ink" : ""}`}
+        >
+          {label}
+        </Button>
+      )}
     </NavLink>
   );
 }
@@ -49,7 +46,7 @@ function ProfilerMenu() {
 
   return (
     <div className="relative group">
-      <Button variant="nav" type="button" className="gap-2">
+      <Button variant="secondary" type="button" className="gap-2 min-w-[140px]">
         Profiler
         <svg
           className="h-4 w-4 opacity-70"
@@ -92,7 +89,7 @@ function CalculatorMenu() {
 
   return (
     <div className="relative group">
-      <Button variant="nav" type="button" className="gap-2">
+      <Button variant="secondary" type="button" className="gap-2 min-w-[140px]">
         Kalkulatory
         <svg
           className="h-4 w-4 opacity-70"
