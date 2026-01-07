@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiUsers } from "../apiUsers";
 import type { CreateUserPayload, UserResponse } from "../../../types/userTypes";
 import { UserFormModal } from "./UserFormModal";
+import Button from "../../../ui/Button";
 
 function fmtDate(iso?: string | null) {
   if (!iso) return "—";
@@ -93,13 +94,9 @@ export default function UsersListPage() {
       <div className="flex items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-[#0f1e3a]">Użytkownicy</h1>
 
-        <button
-          onClick={handleNew}
-          className="inline-flex items-center rounded-md bg-[#0f1e3a] text-white px-4 py-2 text-sm font-medium
-                     hover:bg-[#0b172d] border border-[#d4af37]/60 shadow-sm"
-        >
+        <Button onClick={handleNew} variant="primary">
           + Nowy użytkownik
-        </button>
+        </Button>
       </div>
 
       {data.length === 0 ? (
@@ -149,18 +146,18 @@ export default function UsersListPage() {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-2">
-                      <button
+                      <Button
                         onClick={() => handleEdit(user)}
-                        className="inline-flex items-center rounded-md border border-neutral-300 bg-white text-neutral-700
-                               px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 shadow-sm"
+                        variant="outline"
+                        size="sm"
                       >
                         Edytuj
-                      </button>
+                      </Button>
 
-                      <button
+                      <Button
                         type="button"
-                        className="inline-flex items-center rounded-md border border-red-200 bg-red-50 text-red-700
-                                   px-3 py-1.5 text-xs font-medium hover:bg-red-100 shadow-sm"
+                        variant="danger"
+                        size="sm"
                         onClick={async () => {
                           const ok = window.confirm(
                             `Usunąć użytkownika "${user.username}"?`
@@ -174,7 +171,7 @@ export default function UsersListPage() {
                         }}
                       >
                         Usuń
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>

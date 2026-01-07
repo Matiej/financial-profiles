@@ -1,2 +1,33 @@
 @import "tailwindcss";
 @import "react-datepicker/dist/react-datepicker.css";
+
+/* ✅ Tailwind v4 tokens */
+@theme {
+  --color-brand-mist: #C0CCD9;
+  --color-brand-ink: #5A082D;
+  --color-brand-berry: #860841;
+  --color-brand-cloud: #ECF1F6;
+
+  --font-sans: "Strawford", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    "Noto Sans", "Liberation Sans", sans-serif;
+}
+
+/* Strawford (zostaje jak masz) */
+@font-face {
+  font-family: "Strawford";
+  src: url("./assets/fonts/strawford/strawford-regular-webfont.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+/* ...reszta font-face bez zmian... */
+
+html {
+  font-family: var(--font-sans);
+}
+
+/* ✅ Globalne tło/tekst BEZ @apply (żeby nie wracały błędy) */
+body {
+  background: var(--color-brand-cloud);
+  color: var(--color-brand-ink);
+}

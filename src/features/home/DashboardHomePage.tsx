@@ -6,13 +6,14 @@ import { apiSubmissions } from "../profiler/apiSubmissions";
 import { apiProfiler } from "../profiler/apiProfiler";
 import { apiDictionary } from "../dictionary/apiDictionary";
 import { apiFpTests } from "../fptest/apiFpTests";
+import { apiUsers } from "../users/apiUsers";
 
 type Tile = {
   id: string;
   to: string;
   title: string;
   description: string;
-  category: "profiler" | "dictionary" | "calculator";
+  category: "profiler" | "dictionary" | "calculator" | "users";
   badge?: string;
   icon?: ReactNode;
 };
@@ -81,6 +82,15 @@ const TILES: Tile[] = [
     category: "calculator",
     badge: "Kalkulator",
   },
+  {
+    id: "users",
+    to: "/users",
+    title: "Zarządzanie użytkownikami",
+    description:
+      "Tworzenie, edycja i zarządzanie kontami użytkowników systemu, ustawienia uprawnień.",
+    category: "users",
+    badge: "Użytkownicy",
+  },
 ];
 
 type DashboardSummary = {
@@ -91,6 +101,7 @@ type DashboardSummary = {
   pairsTotal: number;
   testsTotal: number;
   scoringResultsTotal: number;
+  usersTotal: number;
 };
 
 export default function DashboardHomePage() {
@@ -110,12 +121,14 @@ export default function DashboardHomePage() {
           dictionaryData,
           fpTests,
           scoringList,
+          usersList,
         ] = await Promise.all([
           apiSubmissions.list(),
           apiProfiler.list(),
           apiDictionary.all(),
           apiFpTests.list(),
           apiProfiler.scoringList(),
+          apiUsers.listUsers(),
         ]);
 
         const submissionsOpen = submissions.filter(
@@ -137,6 +150,7 @@ export default function DashboardHomePage() {
 
         const testsTotal = fpTests.length;
         const scoringResultsTotal = scoringList.length;
+        const usersTotal = usersList.length;
 
         setSummary({
           submissionsOpen,
@@ -146,6 +160,7 @@ export default function DashboardHomePage() {
           pairsTotal,
           testsTotal,
           scoringResultsTotal,
+          usersTotal,
         });
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
@@ -158,6 +173,7 @@ export default function DashboardHomePage() {
   const profilerTiles = TILES.filter((t) => t.category === "profiler");
   const dictionaryTiles = TILES.filter((t) => t.category === "dictionary");
   const calculatorTiles = TILES.filter((t) => t.category === "calculator");
+  const usersTiles = TILES.filter((t) => t.category === "users");
 
   // Podział Profiler na dwa wiersze:
   const profilerRow1 = profilerTiles.filter((t) =>
@@ -181,6 +197,8 @@ export default function DashboardHomePage() {
         return `${summary.testsTotal} zdefiniowanych testów`;
       case "dictionary":
         return `${summary.pairsTotal} par przekonań`;
+      case "users":
+        return `${summary.usersTotal} użytkowników w systemie`;
       default:
         return null;
     }
@@ -290,6 +308,28 @@ export default function DashboardHomePage() {
             ))}
           </div>
         </section>
+
+        {/* Użytkownicy */}
+        <section>
+          <div className="flex items-baseline justify-between gap-2 mb-3">
+            <h2 className="text-lg font-semibold text-[#0f1e3a]">
+              Zarządzanie użytkownikami
+            </h2>
+            <span className="text-xs text-zinc-500">
+              Tworzenie i edycja kont użytkowników
+            </span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {usersTiles.map((tile) => (
+              <DashboardTile
+                key={tile.id}
+                tile={tile}
+                meta={getMeta(tile.id)}
+                loading={loading}
+              />
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
@@ -307,14 +347,14 @@ function DashboardTile({
   return (
     <Link
       to={tile.to}
-      className="group relative flex flex-col rounded-2xl border border-zinc-200 bg-white/90
+      className="group relative flex flex-col rounded-2xl border border-slate-200 bg-slate-50
                  px-4 py-4 sm:px-5 sm:py-5 shadow-sm hover:shadow-md
-                 hover:border-[#d4af37]/70 transition-all"
+                 hover:bg-slate-100 hover:border-slate-300 transition-all"
     >
       {tile.badge && (
         <span
-          className="inline-flex items-center self-start rounded-full border border-[#d4af37]/60
-                         bg-[#fffaf0] px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-[#7a5a16] mb-2"
+          className="inline-flex items-center self-start rounded-full border border-brand-berry/20
+                         bg-brand-berry/10 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-brand-berry mb-2"
         >
           {tile.badge}
         </span>
@@ -330,8 +370,8 @@ function DashboardTile({
 
       {meta && (
         <p
-          className="mt-2 text-[11px] text-emerald-800
-               bg-emerald-50 border border-emerald-200
+          className="mt-2 text-[11px] text-slate-600
+               bg-slate-100/50 border border-slate-200
                rounded-md px-2 py-1 w-fit"
         >
           {loading ? "Ładowanie podsumowania…" : meta}

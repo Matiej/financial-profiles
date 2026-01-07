@@ -1,3 +1,5 @@
+import Button from "../ui/Button";
+
 type Props = {
   open: boolean;
   status: "DONE" | "FAILED";
@@ -26,7 +28,7 @@ export default function AnalysisDoneModal({
       />
       {/* Panel */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl bg-white border border-[#d4af37]/40 shadow-xl p-6 relative">
+        <div className="w-full max-w-md rounded-2xl bg-white border border-brand-mist/70 shadow-xl p-6 relative">
           <div className="flex items-center gap-3 mb-3">
             <div
               className={[
@@ -59,7 +61,7 @@ export default function AnalysisDoneModal({
               </svg>
             </div>
 
-            <h3 className="text-lg font-semibold text-[#0f1e3a]">
+            <h3 className="text-lg font-semibold text-brand-ink">
               {success
                 ? "Analiza została zakończona"
                 : "Analiza zakończona błędem"}
@@ -88,21 +90,13 @@ export default function AnalysisDoneModal({
 
           <div className="mt-6 flex justify-end gap-3">
             {success && onGoToAnalyses && (
-              <button
-                onClick={onGoToAnalyses}
-                className="inline-flex items-center rounded-md border border-[#0f1e3a] bg-white text-[#0f1e3a]
-                           hover:bg-neutral-50 px-4 py-2 text-sm font-medium shadow-sm"
-              >
+              <Button variant="secondary" onClick={onGoToAnalyses}>
                 Przejdź do analiz
-              </button>
+              </Button>
             )}
-            <button
-              onClick={onClose}
-              className="inline-flex items-center rounded-md bg-[#0f1e3a] text-white px-4 py-2 text-sm font-medium
-                         hover:bg-[#0b172d] border border-[#d4af37]/60 shadow-sm"
-            >
+            <Button variant="primary" onClick={onClose}>
               OK
-            </button>
+            </Button>
           </div>
 
           {/* X w rogu */}

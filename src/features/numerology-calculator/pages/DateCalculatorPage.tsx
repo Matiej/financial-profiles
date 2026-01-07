@@ -2,6 +2,7 @@ import { type FormEvent, useState } from "react";
 import type { NumerologyDatesResult } from "../../../types/ncalculatorTypes";
 import { apiNumerology } from "../apiNumerology";
 import DatePicker from "react-datepicker";
+import Button from "../../../ui/Button";
 
 function formatForBackend(date: Date): string {
   const year = date.getFullYear();
@@ -106,16 +107,9 @@ export default function DateCalculatorPage() {
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex items-center justify-center rounded-md px-6 py-2.5 text-sm font-medium
-                     bg-[#8b2bbf] text-white shadow-sm border border-[#8b2bbf]
-                     hover:bg-[#731fa0] disabled:opacity-60 disabled:cursor-not-allowed
-                     transition-colors"
-        >
+        <Button type="submit" disabled={loading} variant="primary" size="lg">
           {loading ? "Liczenie…" : "Oblicz"}
-        </button>
+        </Button>
 
         {error && <div className="text-sm text-red-600 mt-1">{error}</div>}
       </form>

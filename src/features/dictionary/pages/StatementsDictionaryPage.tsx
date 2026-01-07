@@ -4,13 +4,15 @@ import type {
   StatementCategory,
   StatementDefinitionDto,
 } from "../../../types/profilerTypes";
+import Button from "../../../ui/Button";
 // import type { StatementDefinitionDto, StatementCategory } from "@/types/profilerTypes";
 
 function PrintButton() {
   return (
-    <button
+    <Button
       onClick={() => window.print()}
-      className="no-print inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium border border-neutral-300 shadow-sm hover:bg-neutral-50"
+      variant="secondary"
+      className="no-print gap-2"
       title="Drukuj"
     >
       <svg
@@ -29,7 +31,7 @@ function PrintButton() {
         <path d="M6 14h12v8H6z" />
       </svg>
       Drukuj
-    </button>
+    </Button>
   );
 }
 

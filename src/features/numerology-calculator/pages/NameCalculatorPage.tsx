@@ -7,6 +7,7 @@ import {
   isDigit,
   getNumberForChar,
 } from "../../../lib/letterVibrations";
+import Button from "../../../ui/Button";
 
 export default function NameCalculatorPage() {
   const [phrase, setPhrase] = useState("");
@@ -102,16 +103,9 @@ export default function NameCalculatorPage() {
                      shadow-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37]
                      placeholder:text-neutral-400"
         />
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex items-center justify-center rounded-md px-6 py-2.5 text-sm font-medium
-                     bg-[#8b2bbf] text-white shadow-sm border border-[#8b2bbf]
-                     hover:bg-[#731fa0] disabled:opacity-60 disabled:cursor-not-allowed
-                     transition-colors"
-        >
+        <Button type="submit" disabled={loading} variant="primary" size="lg">
           {loading ? "Liczenie…" : "Oblicz"}
-        </button>
+        </Button>
         {error && <div className="text-sm text-red-600 mt-1">{error}</div>}
       </form>
 
