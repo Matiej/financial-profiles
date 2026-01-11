@@ -15,6 +15,7 @@ import LoginPage from "../auth/LoginPage";
 import { ProtectedRoute } from "../auth/ProtectedRounte";
 import LandingPage from "../features/LandingPage";
 import UsersListPage from "../features/users/pages/UsersListPage";
+import AccountPage from "../features/account/pages/AccountPage";
 
 export function AppRoutes() {
   return (
@@ -151,6 +152,17 @@ export function AppRoutes() {
         element={
           <ProtectedRoute requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN"]}>
             <UsersListPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/account"
+        element={
+          <ProtectedRoute
+            requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN", "CALCULATOR_USER"]}
+          >
+            <AccountPage />
           </ProtectedRoute>
         }
       />

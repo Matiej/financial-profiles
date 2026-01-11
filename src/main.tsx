@@ -6,14 +6,17 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { AnalysisLockProvider } from "./features/analyses/AnalysisLockContext";
 import { AuthProvider } from "./auth/AuthProvider";
+import { ToastProvider } from "./ui/Toast";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <AnalysisLockProvider>
-          <App />
-        </AnalysisLockProvider>
+        <ToastProvider>
+          <AnalysisLockProvider>
+            <App />
+          </AnalysisLockProvider>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

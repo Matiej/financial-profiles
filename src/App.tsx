@@ -3,6 +3,7 @@ import { AppRoutes } from "./app/router";
 import { useAuth } from "./auth/AuthProvider";
 import RouteAwareLockRefresher from "./app/RouteAwareLockRefresher";
 import Button from "./ui/Button";
+import AccountSettingsDropdown from "./features/account/components/AccountSettingsDropdown";
 
 function Brand() {
   return (
@@ -153,12 +154,15 @@ export default function App() {
               )}
             </nav>
 
-            <div className="flex items-center gap-2">
-              {initialized && authenticated ? (
-                <Button onClick={logout} variant="secondary">
-                  Wyloguj
-                </Button>
-              ) : null}
+            <div className="flex items-center gap-3">
+              {initialized && authenticated && (
+                <>
+                  <AccountSettingsDropdown />
+                  <Button onClick={logout} variant="secondary">
+                    Wyloguj
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </header>
