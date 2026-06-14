@@ -1,33 +1,32 @@
 import { fetchJSON } from "../../lib/httpClient";
-import type { StatementCategory, StatementDefinitionDto } from "../../types/profilerTypes";
+import type { StatementProfile, StatementDefinitionDto } from "../../types/profilerTypes";
 
-// mapowanie EN->PL (jak u Ciebie)
-export const CATEGORY_PL: Record<StatementCategory, string> = {
-  SCARCITY_GUARDIAN: "Strażniczka Braku",
-  SELF_SUFFICIENT_SHIELD: "Samowystarczalna Tarcza",
-  FROZEN_VISIONARY: "Zamrożona Wizjonerka",
-  LOYAL_HEIRESS: "Lojalna Dziedziczka",
-  WITHDRAWN_LEADER: "Wycofana Liderka",
-  OVERWORKED_PERFECTIONIST: "Zapracowana Perfekcjonistka",
-  BLOCKED_IN_RECEIVING: "Zatrzymana w Przyjmowaniu",
-  MODESTY_IDEALIST: "Idealistka Skromności",
+export const PROFILE_PL: Record<StatementProfile, string> = {
+  PROFIL_1: "Profil 1 – Strażniczka Braku",
+  PROFIL_2: "Profil 2 – Samowystarczalna Tarcza",
+  PROFIL_3: "Profil 3 – Zamrożona Wizjonerka",
+  PROFIL_4: "Profil 4 – Lojalna Dziedziczka",
+  PROFIL_5: "Profil 5 – Wycofana Liderka",
+  PROFIL_6: "Profil 6 – Zapracowana Perfekcjonistka",
+  PROFIL_7: "Profil 7 – Zatrzymana w Przyjmowaniu",
+  PROFIL_8: "Profil 8 – Idealistka Skromności",
 };
 
-export const ALL_CATEGORIES = Object.keys(CATEGORY_PL) as StatementCategory[];
+export const ALL_PROFILES = Object.keys(PROFILE_PL) as StatementProfile[];
 
 export const apiDictionary = {
-  byCategory: (category: StatementCategory): Promise<StatementDefinitionDto[]> =>
-    fetchJSON(`/definition/category?category=${encodeURIComponent(category)}`),
+  byCategory: (category: StatementProfile): Promise<StatementDefinitionDto[]> =>
+    fetchJSON(`/definition?category=${encodeURIComponent(category)}`),
 
   all: async () => {
     const entries = await Promise.all(
-      ALL_CATEGORIES.map(async (cat) => {
+      ALL_PROFILES.map(async (profile) => {
         const list = await fetchJSON<StatementDefinitionDto[]>(
-          `/definition/category?category=${encodeURIComponent(cat)}`
+          `/definition?category=${encodeURIComponent(profile)}`
         );
-        return [cat, list] as const;
+        return [profile, list] as const;
       })
     );
-    return Object.fromEntries(entries) as Record<StatementCategory, StatementDefinitionDto[]>;
+    return Object.fromEntries(entries) as Record<StatementProfile, StatementDefinitionDto[]>;
   },
 };

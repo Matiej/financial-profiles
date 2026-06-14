@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { CATEGORY_PL, ALL_CATEGORIES, apiDictionary } from "../apiDictionary";
+import { PROFILE_PL, ALL_PROFILES, apiDictionary } from "../apiDictionary";
 import type {
-  StatementCategory,
+  StatementProfile,
   StatementDefinitionDto,
 } from "../../../types/profilerTypes";
 import Button from "../../../ui/Button";
-// import type { StatementDefinitionDto, StatementCategory } from "@/types/profilerTypes";
 
 function PrintButton() {
   return (
@@ -36,7 +35,7 @@ function PrintButton() {
 }
 
 type DictState = {
-  data: Partial<Record<StatementCategory, StatementDefinitionDto[]>>;
+  data: Partial<Record<StatementProfile, StatementDefinitionDto[]>>;
   loading: boolean;
   error: string | null;
 };
@@ -97,20 +96,20 @@ export default function StatementsDictionaryPage() {
 
       {!state.loading && !state.error && (
         <div className="grid grid-cols-1 gap-5 max-w-[1100px]">
-          {ALL_CATEGORIES.map((cat) => {
-            const list = state.data[cat] ?? [];
+          {ALL_PROFILES.map((profile) => {
+            const list = state.data[profile] ?? [];
             const sorted = [...list].sort(
               (a, b) => Number(a.statementId) - Number(b.statementId)
             );
 
             return (
               <div
-                key={cat}
+                key={profile}
                 className="avoid-break border border-zinc-200 rounded-xl p-5 bg-white"
               >
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="text-[1.25rem] font-medium text-slate-800 pb-1 border-b-2 border-slate-200 mb-2">
-                    {CATEGORY_PL[cat]}
+                    {PROFILE_PL[profile]}
                   </div>
                   <div className="text-xs text-zinc-600">
                     {sorted.length} par

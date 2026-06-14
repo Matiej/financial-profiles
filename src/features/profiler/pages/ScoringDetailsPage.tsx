@@ -69,11 +69,11 @@ const BUCKET_LABELS: Record<ScoreBucketKey, string> = {
 };
 
 const BUCKET_COLORS: Record<ScoreBucketKey, string> = {
-  "-2": "#b91c1c", // ciemny czerwony
-  "-1": "#f97316", // pomarańczowy
-  "0": "#9ca3af", // szary
-  "1": "#22c55e", // zielony
-  "2": "#15803d", // ciemniejszy zielony
+  "-2": "#b91c1c",
+  "-1": "#f97316",
+  "0": "#9ca3af",
+  "1": "#22c55e",
+  "2": "#15803d",
 };
 
 type PieChartProps = {
@@ -170,6 +170,17 @@ function groupByScoring(pairs: ScoringStatementPair[]) {
     groups[key].push(p);
   }
   return groups;
+}
+
+function profileNumber(profileId: string): string {
+  const match = profileId.match(/PROFIL_(\d+)/);
+  return match ? match[1] : profileId;
+}
+
+function scorePercentColor(pct: number): string {
+  if (pct <= 0) return "text-red-700";
+  if (pct < 68) return "text-amber-600";
+  return "text-emerald-700";
 }
 
 export default function ScoringDetailsPage() {
@@ -281,35 +292,37 @@ export default function ScoringDetailsPage() {
             </div>
           </div>
 
-          {/* ZBIORCZA TABLICA KATEGORII */}
+          {/* ZBIORCZA TABLICA PROFILI */}
           <div className="mb-6 border border-zinc-200 rounded-lg bg-white">
             <div className="border-b border-zinc-200 px-4 py-2">
               <h2 className="text-sm font-semibold text-zinc-800 m-0">
-                Kategorie – przegląd (od najbardziej obciążonej)
+                Profile – przegląd (od najbardziej obciążonego)
               </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-xs text-zinc-500 border-b border-zinc-100">
-                    <th className="px-4 py-2">Kategoria</th>
+                    <th className="px-4 py-2">Profil</th>
+                    <th className="px-4 py-2 text-right">Score %</th>
                     <th className="px-4 py-2 text-right">Scoring</th>
-                    <th className="px-4 py-2 text-right">
-                      Liczba odpowiedzi
-                    </th>
+                    <th className="px-4 py-2 text-right">Liczba odpowiedzi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.categories
+                  {data.profiles
                     .slice()
                     .sort((a, b) => a.totalScore - b.totalScore)
                     .map((cat) => (
                       <tr
-                        key={cat.category.categoryName}
+                        key={cat.profileId}
                         className="border-t border-zinc-100 hover:bg-zinc-50/60"
                       >
                         <td className="px-4 py-2">
-                          {cat.category.description}
+                          Profil {profileNumber(cat.profileId)} ({cat.profileName})
+                        </td>
+                        <td className={`px-4 py-2 text-right font-mono ${scorePercentColor(cat.scorePercent)}`}>
+                          {cat.scorePercent.toFixed(1)}%
                         </td>
                         <td className="px-4 py-2 text-right font-mono">
                           <span
@@ -334,19 +347,24 @@ export default function ScoringDetailsPage() {
             </div>
           </div>
 
-          {/* SZCZEGÓŁOWE KARTY KATEGORII */}
+          {/* SZCZEGÓŁOWE KARTY PROFILI */}
           <div className="grid gap-4">
-            {data.categories.map((cat) => {
+            {data.profiles.map((cat) => {
               const grouped = groupByScoring(cat.answersBySeverity);
               return (
                 <div
-                  key={cat.category.categoryName}
+                  key={cat.profileId}
                   className="avoid-break border border-zinc-200 rounded-lg p-4 bg-white"
                 >
                   <div className="flex items-center justify-between gap-4 mb-2">
-                    <h2 className="text-xl font-semibold m-0">
-                      {cat.category.description}
-                    </h2>
+                    <div>
+                      <h2 className="text-xl font-semibold m-0">
+                        Profil {profileNumber(cat.profileId)}
+                      </h2>
+                      <div className="text-sm text-zinc-500 mt-0.5">
+                        {cat.computedLabel}
+                      </div>
+                    </div>
                     <div className="text-right text-sm">
                       <div>
                         <b>Wynik kategorii:</b>{" "}
@@ -363,27 +381,25 @@ export default function ScoringDetailsPage() {
                         </span>
                       </div>
                       <div className="text-xs text-zinc-500">
-                        {cat.totalAnswers} odpowiedzi•średnia{" "}
+                        {cat.totalAnswers} odpowiedzi • średnia{" "}
                         {cat.avgScore.toFixed(2)}
                       </div>
                     </div>
                   </div>
 
-                  {/* Mini rozkład bucketów w kategorii */}
-                  <div className="mt-1 mb-3 flex flex-wrap gap-2 text-xs">
-                    {BUCKET_ORDER.map((b) => {
-                      const v = cat.scoreBuckets[b] ?? 0;
-                      if (!v) return null;
-                      return (
-                        <span
-                          key={b}
-                          className="inline-flex items-center rounded-full border border-zinc-200 px-2 py-1 bg-zinc-50"
-                        >
-                          <span className="font-mono mr-1">{b}</span>
-                          <span>{v} odp.</span>
-                        </span>
-                      );
-                    })}
+                  {/* Badge scorePercent */}
+                  <div className="mt-1 mb-3">
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2 py-1 text-xs font-mono ${
+                        cat.scorePercent <= 0
+                          ? "border-red-200 bg-red-50 text-red-700"
+                          : cat.scorePercent < 68
+                          ? "border-amber-200 bg-amber-50 text-amber-700"
+                          : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                      }`}
+                    >
+                      {cat.scorePercent.toFixed(1)}%
+                    </span>
                   </div>
 
                   {/* Lista par przekonań, pogrupowana po scoringu */}
