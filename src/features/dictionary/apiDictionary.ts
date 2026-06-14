@@ -14,6 +14,17 @@ export const PROFILE_PL: Record<StatementProfile, string> = {
 
 export const ALL_PROFILES = Object.keys(PROFILE_PL) as StatementProfile[];
 
+// Obsługuje zarówno "Strażniczka Braku" (stara BE) jak i "PROFIL_1" (nowa BE)
+export function formatProfileLabel(category: string): string {
+  if (category in PROFILE_PL) {
+    return PROFILE_PL[category as StatementProfile];
+  }
+  const entry = Object.entries(PROFILE_PL).find(
+    ([, label]) => label.split(" – ")[1] === category
+  );
+  return entry ? entry[1] : category;
+}
+
 export const apiDictionary = {
   byCategory: (category: StatementProfile): Promise<StatementDefinitionDto[]> =>
     fetchJSON(`/definition?category=${encodeURIComponent(category)}`),
