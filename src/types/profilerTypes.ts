@@ -37,24 +37,23 @@ export type ProfiledSubmission = {
 };
 
 // Dictionary
-export type StatementCategory =
-  | "SCARCITY_GUARDIAN"
-  | "SELF_SUFFICIENT_SHIELD"
-  | "FROZEN_VISIONARY"
-  | "LOYAL_HEIRESS"
-  | "WITHDRAWN_LEADER"
-  | "OVERWORKED_PERFECTIONIST"
-  | "BLOCKED_IN_RECEIVING"
-  | "MODESTY_IDEALIST";
+export type StatementProfile =
+  | "PROFIL_1"
+  | "PROFIL_2"
+  | "PROFIL_3"
+  | "PROFIL_4"
+  | "PROFIL_5"
+  | "PROFIL_6"
+  | "PROFIL_7"
+  | "PROFIL_8";
 
 export interface StatementTypeDefinition {
-  key: string;
   statementType: StatementType;
   statementDescription: string;
 }
 export interface StatementDefinitionDto {
   statementId: string;
-  category: StatementCategory;
+  category: StatementProfile;
   statementKey: string;
   statementTypeDefinitions: StatementTypeDefinition[];
 }
@@ -147,11 +146,13 @@ export type ScoringStatementPair = {
 };
 
 export type ScoringCategoryBlock = {
-  category: ProfileCategory;  
+  profileId: StatementProfile;
+  profileName: string;
+  computedLabel: string;
+  scorePercent: number;
   totalAnswers: number;
   totalScore: number;
   avgScore: number;
-  scoreBuckets: ScoreBuckets;
   answersBySeverity: ScoringStatementPair[];
 };
 
@@ -163,7 +164,7 @@ export type ScoringProfiledSubmission = {
   submissionDate: string; // ISO
   testId: string;
   testName: string;
-  clientTestDate: string; 
+  clientTestDate: string;
   overallSummary: ScoringOverallSummary;
-  categories: ScoringCategoryBlock[];
+  profiles: ScoringCategoryBlock[];
 };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FpTest, FpTestStatement } from "../../../types/fpTestTypes";
 import { apiFpTests } from "..//apiFpTests";
+import { formatProfileLabel } from "../../dictionary/apiDictionary";
 import Button from "../../../ui/Button";
 
 type Props = {
@@ -259,7 +260,7 @@ export function FpTestFormModal({ open, onClose, onSubmit, initial }: Props) {
                               {st.statementsDescription}
                             </div>
                             <div className="text-xs text-zinc-500">
-                              Kategoria: {st.statementsCategory}
+                              {formatProfileLabel(st.statementsCategory)}
                             </div>
                           </div>
                         </li>

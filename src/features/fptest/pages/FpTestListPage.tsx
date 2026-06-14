@@ -4,6 +4,7 @@ import { apiFpTests } from "../apiFpTests";
 import { FpTestFormModal } from "./FpTestFormModal";
 import { TestIdModal } from "./TestIdModal";
 import { ApiError } from "../../../lib/httpClient";
+import { formatProfileLabel } from "../../dictionary/apiDictionary";
 import React from "react";
 import Button from "../../../ui/Button";
 
@@ -332,7 +333,7 @@ export default function FpTestListPage() {
                                       {st.statementsDescription}
                                     </div>
                                     <div className="text-xs text-zinc-500 mt-1 sm:mt-0 sm:ml-3">
-                                      Kategoria: {st.statementsCategory}
+                                      {formatProfileLabel(st.statementsCategory)}
                                     </div>
                                   </li>
                                 ))}
