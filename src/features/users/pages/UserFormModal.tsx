@@ -49,6 +49,8 @@ export function UserFormModal({ open, onClose, onSubmit, initial }: Props) {
 
     // minimalna walidacja FE (backend i tak waliduje)
     if (!username.trim()) return setError("Podaj username.");
+    if (username.trim().length < 4)
+      return setError("Username musi mieć przynajmniej 4 znaki.");
     if (!firstName.trim()) return setError("Podaj imię.");
     if (!lastName.trim()) return setError("Podaj nazwisko.");
     if (!email.trim()) return setError("Podaj email.");
