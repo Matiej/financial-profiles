@@ -40,7 +40,7 @@ export default function ScoringListPage() {
   return (
     <div className="max-w-5xl mx-auto">
       <h1 className="text-2xl font-semibold text-[#0f1e3a] mb-4 text-center">
-        Wyniki testu scoringowego
+        Wyniki testów
       </h1>
 
       {data.length === 0 ? (

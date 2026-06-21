@@ -2,18 +2,18 @@ import { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { AppRoutes } from "./app/router";
 import { useAuth } from "./auth/AuthProvider";
-import RouteAwareLockRefresher from "./app/RouteAwareLockRefresher";
 import Button from "./ui/Button";
 import AccountSettingsDropdown from "./features/account/components/AccountSettingsDropdown";
+import bgImage from "./assets/images/background.jpeg";
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-3">
-      <img src="/logo.png" alt="Finance Profiler" className="h-10 w-auto" />
-      <div className="leading-tight">
-        <div className="text-sm font-semibold text-slate-900">Finance Profiler</div>
-        <div className="text-xs text-slate-600">Panel</div>
-      </div>
+    <Link
+      to="/"
+      className="text-sm font-normal tracking-wide text-slate-800 hover:text-brand-berry transition-colors leading-tight text-center"
+    >
+      <span className="block">Agnieszka Kotlonek</span>
+      <span className="block">Hipnoza w Biznesie</span>
     </Link>
   );
 }
@@ -50,17 +50,14 @@ function ProfilerMenu() {
       </Button>
 
       <div className="absolute left-0 mt-1 w-56 rounded-md border border-brand-mist/70 bg-white shadow-lg py-1 text-sm z-50 hidden group-hover:block">
-        <NavLink to="/results" className={({ isActive }) => itemClass(isActive)}>
-          Lista wyników (tally)
-        </NavLink>
         <NavLink to="/scoring-results" className={({ isActive }) => itemClass(isActive)}>
-          Wyniki scoring
+          Wyniki testów
         </NavLink>
         <NavLink to="/submissions" className={({ isActive }) => itemClass(isActive)}>
-          Oczekujące zgłoszenia
+          Nowy test
         </NavLink>
         <NavLink to="/tests" className={({ isActive }) => itemClass(isActive)}>
-          Testy
+          Edycja testów
         </NavLink>
       </div>
     </div>
@@ -155,16 +152,13 @@ function MobileMenu({
 
               {sectionLabel("Profiler")}
               <NavLink to="/scoring-results" className={linkClass} onClick={onClose}>
-                Wyniki scoring
-              </NavLink>
-              <NavLink to="/results" className={linkClass} onClick={onClose}>
-                Lista wyników (tally)
+                Wyniki testów
               </NavLink>
               <NavLink to="/submissions" className={linkClass} onClick={onClose}>
-                Oczekujące zgłoszenia
+                Nowy test
               </NavLink>
               <NavLink to="/tests" className={linkClass} onClick={onClose}>
-                Testy
+                Edycja testów
               </NavLink>
             </>
           )}
@@ -224,11 +218,13 @@ export default function App() {
 
   return (
     <div className="relative min-h-dvh">
-      {/* Tło */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-brand-cloud" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-brand-cloud via-white to-brand-mist/40" />
-
-      <RouteAwareLockRefresher />
+      {/* Tło – zdjęcie z chmurami, wyśrodkowane, stałe na każdej zakładce */}
+      <div className="pointer-events-none fixed inset-0 -z-20 bg-brand-cloud" />
+      <div
+        className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${bgImage})` }}
+      />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-white/55" />
 
       {/* Header tylko poza /login */}
       {!isLoginRoute && (

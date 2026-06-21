@@ -178,7 +178,7 @@ export default function FpTestListPage() {
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-[#0f1e3a]">
-          Testy finansowego profilu
+          Edycja testów
         </h1>
         <Button onClick={handleNew} variant="primary">
           + Nowy test

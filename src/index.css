@@ -12,15 +12,36 @@
     "Noto Sans", "Liberation Sans", sans-serif;
 }
 
-/* Strawford (zostaje jak masz) */
+/* ===== FONT STRAWFORD =====
+   Ładujemy realne wagi (400/500/700) w woff2 + woff, żeby przeglądarka
+   nie syntetyzowała sztucznego pogrubienia z wagi 400.
+   font-medium → 500, font-semibold(600) → mapuje na 700, font-bold → 700. */
 @font-face {
   font-family: "Strawford";
-  src: url("./assets/fonts/strawford/strawford-regular-webfont.woff2") format("woff2");
+  src: url("./assets/fonts/strawford/strawford-regular-webfont.woff2") format("woff2"),
+       url("./assets/fonts/strawford/strawford-regular-webfont.woff") format("woff");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
-/* ...reszta font-face bez zmian... */
+
+@font-face {
+  font-family: "Strawford";
+  src: url("./assets/fonts/strawford/strawford-medium-webfont.woff2") format("woff2"),
+       url("./assets/fonts/strawford/strawford-medium-webfont.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Strawford";
+  src: url("./assets/fonts/strawford/strawford-bold-webfont.woff2") format("woff2"),
+       url("./assets/fonts/strawford/strawford-bold-webfont.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 html {
   font-family: var(--font-sans);

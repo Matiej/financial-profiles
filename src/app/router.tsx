@@ -1,8 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import ListPage from "../features/profiler/pages/ListPage";
-import DetailsPage from "../features/profiler/pages/DetailsPage";
-import AnalysesListPage from "../features/analyses/pages/AnalysesListPage";
-import AnalysisDetailsPage from "../features/analyses/pages/AnalysesDetailsPage";
 import StatementsDictionaryPage from "../features/dictionary/pages/StatementsDictionaryPage";
 import NameCalculatorPage from "../features/numerology-calculator/pages/NameCalculatorPage";
 import DateCalculatorPage from "../features/numerology-calculator/pages/DateCalculatorPage";
@@ -45,24 +41,6 @@ export function AppRoutes() {
       />
 
       <Route
-        path="/results"
-        element={
-          <ProtectedRoute requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN"]}>
-            <ListPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/results/:submissionId"
-        element={
-          <ProtectedRoute requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN"]}>
-            <DetailsPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
         path="/scoring-results"
         element={
           <ProtectedRoute requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN"]}>
@@ -81,28 +59,10 @@ export function AppRoutes() {
       />
 
       <Route
-        path="/results/:submissionId/analyses"
-        element={
-          <ProtectedRoute requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN"]}>
-            <AnalysesListPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
         path="/submissions"
         element={
           <ProtectedRoute requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN"]}>
             <SubmissionListPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/submissions/:submissionId/analyses/:index"
-        element={
-          <ProtectedRoute requiredRoles={["BUSINESS_ADMIN", "TECH_ADMIN"]}>
-            <AnalysisDetailsPage />
           </ProtectedRoute>
         }
       />
