@@ -10,9 +10,10 @@ function Brand() {
   return (
     <Link
       to="/"
-      className="text-sm font-normal tracking-wide text-slate-800 hover:text-brand-berry transition-colors"
+      className="text-sm font-normal tracking-wide text-slate-800 hover:text-brand-berry transition-colors leading-tight text-center"
     >
-      Agnieszka Kotlonek Hipnoza w Biznesie
+      <span className="block">Agnieszka Kotlonek</span>
+      <span className="block">Hipnoza w Biznesie</span>
     </Link>
   );
 }

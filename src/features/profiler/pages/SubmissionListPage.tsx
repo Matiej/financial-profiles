@@ -305,7 +305,7 @@ export default function SubmissionListPage() {
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-[#0f1e3a]">
-          Oczekujące zgłoszenia
+          Testy użytkowników
         </h1>
         <Button onClick={handleNew} variant="primary">
           + Nowe zgłoszenie

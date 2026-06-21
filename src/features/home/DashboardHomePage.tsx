@@ -20,27 +20,18 @@ type Tile = {
 
 const TILES: Tile[] = [
   {
-    id: "results",
-    to: "/results",
-    title: "Lista wyników (tally)",
-    description:
-      "Podgląd wszystkich zakończonych testów w wersji Tally, wysyłka do analizy AI, dostęp do raportów.",
-    category: "profiler",
-    badge: "Profiler",
-  },
-  {
     id: "results-scoring",
     to: "/scoring-results",
-    title: "Lista wyników scoring",
+    title: "Wyniki testów",
     description:
-      "Podgląd wyników nowego testu scoringowego – rozkład odpowiedzi i style w jednej przestrzeni.",
+      "Podgląd wyników testu scoringowego – rozkład odpowiedzi i style w jednej przestrzeni.",
     category: "profiler",
     badge: "Profiler",
   },
   {
     id: "submissions",
     to: "/submissions",
-    title: "Oczekujące zgłoszenia",
+    title: "Nowy test",
     description:
       "Tworzenie linków do testów, czas ważności, status wypełnienia przez klienta.",
     category: "profiler",
@@ -49,7 +40,7 @@ const TILES: Tile[] = [
   {
     id: "tests",
     to: "/tests",
-    title: "Testy finansowego profilu",
+    title: "Edycja testów",
     description:
       "Zarządzanie testami: nazwy, opisy, przypisane pary przekonań.",
     category: "profiler",
@@ -96,8 +87,6 @@ const TILES: Tile[] = [
 type DashboardSummary = {
   submissionsOpen: number;
   submissionsDone: number;
-  resultsTotal: number;
-  resultsAnalyzed: number;
   pairsTotal: number;
   testsTotal: number;
   scoringResultsTotal: number;
@@ -117,14 +106,12 @@ export default function DashboardHomePage() {
 
         const [
           submissions,
-          profilerList,
           dictionaryData,
           fpTests,
           scoringList,
           usersList,
         ] = await Promise.all([
           apiSubmissions.list(),
-          apiProfiler.list(),
           apiDictionary.all(),
           apiFpTests.list(),
           apiProfiler.scoringList(),
@@ -136,11 +123,6 @@ export default function DashboardHomePage() {
         ).length;
         const submissionsDone = submissions.filter(
           (s) => s.status === "DONE"
-        ).length;
-
-        const resultsTotal = profilerList.length;
-        const resultsAnalyzed = profilerList.filter(
-          (r) => r.isAnalyzed
         ).length;
 
         const pairsTotal = Object.values(dictionaryData).reduce(
@@ -155,8 +137,6 @@ export default function DashboardHomePage() {
         setSummary({
           submissionsOpen,
           submissionsDone,
-          resultsTotal,
-          resultsAnalyzed,
           pairsTotal,
           testsTotal,
           scoringResultsTotal,
@@ -175,22 +155,19 @@ export default function DashboardHomePage() {
   const calculatorTiles = TILES.filter((t) => t.category === "calculator");
   const usersTiles = TILES.filter((t) => t.category === "users");
 
-  // Podział Profiler na dwa wiersze:
   const profilerRow1 = profilerTiles.filter((t) =>
-    ["results", "results-scoring"].includes(t.id)
+    ["results-scoring", "submissions"].includes(t.id)
   );
   const profilerRow2 = profilerTiles.filter((t) =>
-    ["submissions", "tests"].includes(t.id)
+    ["tests"].includes(t.id)
   );
 
   const getMeta = (id: string): string | null => {
     if (!summary) return null;
 
     switch (id) {
-      case "results":
-        return `${summary.resultsTotal} wyników, ${summary.resultsAnalyzed} z analizą AI`;
       case "results-scoring":
-        return `${summary.scoringResultsTotal} wyników scoring`;
+        return `${summary.scoringResultsTotal} wyników testów`;
       case "submissions":
         return `${summary.submissionsOpen} oczekujące, ${summary.submissionsDone} zakończone`;
       case "tests":
@@ -206,12 +183,6 @@ export default function DashboardHomePage() {
 
   return (
     <div className="relative max-w-6xl mx-auto px-2 sm:px-4 py-6">
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 opacity-70
-      bg-[radial-gradient(circle_at_90%_0%,_#f4ecff_0,_transparent_60%),
-          radial-gradient(circle_at_80%_100%,_#e0f2fe_0,_transparent_60%)]"
-      />
-
       <header className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-semibold text-[#0f1e3a] mb-2">
           Panel główny systemu testów
@@ -236,11 +207,10 @@ export default function DashboardHomePage() {
               Profiler i testy
             </h2>
             <span className="text-xs text-zinc-500">
-              Zarządzanie testami, zgłoszeniami i analizami AI
+              Zarządzanie testami i zgłoszeniami
             </span>
           </div>
 
-          {/* Wiersz 1: lista wyników tally + lista wyników scoring */}
           <div className="grid gap-4 md:grid-cols-2 mb-4">
             {profilerRow1.map((tile) => (
               <DashboardTile
@@ -252,16 +222,17 @@ export default function DashboardHomePage() {
             ))}
           </div>
 
-          {/* Wiersz 2: oczekujące zgłoszenia + testy */}
-          <div className="grid gap-4 md:grid-cols-2">
-            {profilerRow2.map((tile) => (
-              <DashboardTile
-                key={tile.id}
-                tile={tile}
-                meta={getMeta(tile.id)}
-                loading={loading}
-              />
-            ))}
+          <div className="flex justify-center">
+            <div className="w-full md:w-1/2 md:pr-2">
+              {profilerRow2.map((tile) => (
+                <DashboardTile
+                  key={tile.id}
+                  tile={tile}
+                  meta={getMeta(tile.id)}
+                  loading={loading}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -275,15 +246,17 @@ export default function DashboardHomePage() {
               Podgląd i praca z pełnym słownikiem przekonań
             </span>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {dictionaryTiles.map((tile) => (
-              <DashboardTile
-                key={tile.id}
-                tile={tile}
-                meta={getMeta(tile.id)}
-                loading={loading}
-              />
-            ))}
+          <div className="flex justify-center">
+            <div className="w-full md:w-1/2">
+              {dictionaryTiles.map((tile) => (
+                <DashboardTile
+                  key={tile.id}
+                  tile={tile}
+                  meta={getMeta(tile.id)}
+                  loading={loading}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -297,14 +270,15 @@ export default function DashboardHomePage() {
               Szybkie narzędzia do pracy indywidualnej
             </span>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex justify-center gap-4">
             {calculatorTiles.map((tile) => (
-              <DashboardTile
-                key={tile.id}
-                tile={tile}
-                meta={null} // na razie bez liczb
-                loading={loading}
-              />
+              <div key={tile.id} className="w-full md:w-1/2">
+                <DashboardTile
+                  tile={tile}
+                  meta={null}
+                  loading={loading}
+                />
+              </div>
             ))}
           </div>
         </section>
@@ -319,15 +293,17 @@ export default function DashboardHomePage() {
               Tworzenie i edycja kont użytkowników
             </span>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {usersTiles.map((tile) => (
-              <DashboardTile
-                key={tile.id}
-                tile={tile}
-                meta={getMeta(tile.id)}
-                loading={loading}
-              />
-            ))}
+          <div className="flex justify-center">
+            <div className="w-full md:w-1/2">
+              {usersTiles.map((tile) => (
+                <DashboardTile
+                  key={tile.id}
+                  tile={tile}
+                  meta={getMeta(tile.id)}
+                  loading={loading}
+                />
+              ))}
+            </div>
           </div>
         </section>
       </div>

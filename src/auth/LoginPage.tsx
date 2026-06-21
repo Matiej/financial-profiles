@@ -17,19 +17,10 @@ export default function LoginPage() {
     <div className="flex min-h-dvh items-center justify-center px-4">
       <div className="w-full max-w-md rounded-2xl border border-brand-mist/70 bg-white p-8 shadow-lg">
 
-        {/* TYTUŁ */}
-        <h1 className="mb-6 text-center text-2xl font-semibold text-brand-ink">
-          Panel Finance Profiler
+        {/* TYTUŁ – taki sam jak na belce (Strawford 400) */}
+        <h1 className="mb-6 text-center text-xl font-normal tracking-wide text-slate-800">
+          Agnieszka Kotlonek Hipnoza w Biznesie
         </h1>
-
-        {/* LOGO */}
-        <div className="mb-4 flex justify-center">
-          <img
-            src="/logo.png"
-            alt="Finance Profiler"
-            className="h-30 w-auto opacity-90"
-          />
-        </div>
 
         {/* PRZYCISK */}
         <Button
