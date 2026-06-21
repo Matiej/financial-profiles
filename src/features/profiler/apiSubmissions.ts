@@ -33,18 +33,8 @@ export const apiSubmissions = {
       body: JSON.stringify(payload),
     }),
 
-  delete: async (submissionId: string): Promise<void> => {
-    const res = await fetch(`/api/submission/${encodeURIComponent(submissionId)}`, {
+  delete: (submissionId: string): Promise<void> =>
+    fetchJSON(`/submission/${encodeURIComponent(submissionId)}`, {
       method: "DELETE",
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `HTTP ${res.status} ${res.statusText}${text ? ` – ${text}` : ""
-        }`
-      );
-    }
-  },
+    }),
 };
