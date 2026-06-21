@@ -224,7 +224,7 @@ export default function App() {
         className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${bgImage})` }}
       />
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-white/55" />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-white/20" />
 
       {/* Header tylko poza /login */}
       {!isLoginRoute && (
