@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiSubmissions } from "../apiSubmissions";
+import { ApiError } from "../../../lib/httpClient";
 import type { Submission } from "../../../types/submissionTypes";
 import { SubmissionFormModal } from "./SubmissionFormModal";
 import type { FpTest } from "../../../types/fpTestTypes";
@@ -239,6 +240,13 @@ export default function SubmissionListPage() {
         prev.filter((it) => it.submissionId !== sub.submissionId)
       );
     } catch (e: unknown) {
+      if (e instanceof ApiError && e.status === 404) {
+        alert("To zgłoszenie już nie istnieje — odświeżam listę.");
+        setData((prev) =>
+          prev.filter((it) => it.submissionId !== sub.submissionId)
+        );
+        return;
+      }
       alert(
         `Nie udało się usunąć zgłoszenia: ${
           e instanceof Error ? e.message : String(e)
