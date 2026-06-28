@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import type { Submission } from "../../../types/submissionTypes";
 import type { FpTest } from "../../../types/fpTestTypes";
 import { apiSubmissions } from "../apiSubmissions";
+import { ApiError } from "../../../lib/httpClient";
 import Button from "../../../ui/Button";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Props = {
   open: boolean;
@@ -79,21 +82,32 @@ export function SubmissionFormModal({
       setError("Wybierz test z listy.");
       return;
     }
+    const email = clientEmail.trim();
+    if (email && !EMAIL_RE.test(email)) {
+      setError("Podaj poprawny adres e-mail lub zostaw pole puste.");
+      return;
+    }
 
     try {
       setSaving(true);
       setError(null);
       await onSubmit({
         clientName: clientName.trim(),
-        clientEmail: clientEmail.trim(),
+        clientEmail: email,
         testId: selectedTestId.trim(),
         durationDays: durationDays,
       });
       onClose();
     } catch (e: unknown) {
-      setError(
-        e instanceof Error ? e.message : "Nie udało się zapisać zgłoszenia."
-      );
+      if (e instanceof ApiError && e.status === 404) {
+        setError(
+          "To zgłoszenie już nie istnieje (mogło zostać usunięte). Zamknij i odśwież listę."
+        );
+      } else {
+        setError(
+          e instanceof Error ? e.message : "Nie udało się zapisać zgłoszenia."
+        );
+      }
     } finally {
       setSaving(false);
     }
@@ -135,7 +149,7 @@ export function SubmissionFormModal({
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-1">
-                E-mail
+                E-mail <span className="text-zinc-400">(opcjonalnie)</span>
               </label>
               <input
                 type="email"
